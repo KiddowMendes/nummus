@@ -1,17 +1,13 @@
-import { Text, View, StyleSheet } from "react-native";
+import React from "react";
+import { View, Text } from "@/tw";
 
 export default function Index() {
   return (
-    <View style={styles.container}>
-      <Text>Edit src/app/index.tsx to edit this screen.</Text>
+    <View className="flex-1 items-center justify-center bg-slate-50">
+      <View className="p-6 bg-white rounded-2xl shadow-lg">
+        <Text className="text-2xl font-bold text-slate-900">Nummus App</Text>
+        <Text className="text-slate-500 mt-2">NativeWind v5 + Tailwind v4</Text>
+      </View>
     </View>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+} 
