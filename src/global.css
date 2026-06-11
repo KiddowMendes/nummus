@@ -18,7 +18,13 @@
   --color-border: #334155;
 
   /* Brand / action */
-  --color-primary: #4F46E5;
+  --color-primary: #1657E8;
+
+  /* Logo accent */
+  --color-accent: #00AEEF;
+
+  /* Dark navy from logo */
+  --color-navy: #0F1729;
 
   /* Semantic finance */
   --color-success: #10B981;

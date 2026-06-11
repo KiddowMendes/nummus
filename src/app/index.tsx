@@ -1,13 +1,28 @@
 import React from "react";
-import { View, Text } from "@/tw";
+import { View, Text, Pressable } from "@/tw";
+import { router } from "expo-router";
+import { NummusLogo } from "@/constants/images";
 
-export default function Index() {
+export default function WelcomeScreen() {
   return (
-    <View className="flex-1 items-center justify-center bg-slate-50">
-      <View className="p-6 bg-white rounded-2xl shadow-lg">
-        <Text className="text-2xl font-bold text-slate-900">Nummus App</Text>
-        <Text className="text-slate-500 mt-2">NativeWind v5 + Tailwind v4</Text>
+    <View className="flex-1 bg-background px-6">
+      <View className="flex-1 items-center justify-center">
+        <NummusLogo width={96} height={96} />
+        <Text className="text-4xl font-bold text-text-primary tracking-tight mt-6">
+          Nummus
+        </Text>
+        <Text className="text-text-muted text-sm mt-1 tracking-widest uppercase">
+          Manage
+        </Text>
+      </View>
+      <View className="pb-12">
+        <Pressable
+          className="bg-primary py-4 rounded-xl items-center active:opacity-80"
+          onPress={() => router.push("/bank-selection")}
+        >
+          <Text className="text-white text-lg font-semibold">Get Started</Text>
+        </Pressable>
       </View>
     </View>
   );
-} 
+}
