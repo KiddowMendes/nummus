@@ -15,12 +15,18 @@ export default function WelcomeScreen() {
           Manage
         </Text>
       </View>
-      <View className="pb-12">
+      <View className="pb-12 gap-4">
         <Pressable
           className="bg-primary py-4 rounded-xl items-center active:opacity-80"
           onPress={() => router.push("/bank-selection")}
         >
           <Text className="text-white text-lg font-semibold">Get Started</Text>
+        </Pressable>
+        <Pressable
+          className="py-3 items-center"
+          onPress={() => router.push("/login")}
+        >
+          <Text className="text-text-muted text-sm">Already have an account? Log In</Text>
         </Pressable>
       </View>
     </View>
