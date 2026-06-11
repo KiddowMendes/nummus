@@ -40,6 +40,7 @@ export function BankCard({
   maskedNumber,
 }: BankCardProps) {
   const displayNumber = maskedNumber ?? generateMaskedNumber();
+  const textShadow = { textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 1 } as const, textShadowRadius: 3 };
 
   return (
     <LinearGradient
@@ -50,27 +51,27 @@ export function BankCard({
     >
       <View className="flex-row justify-between items-start mb-8">
         <View className="flex-1">
-          <Text className="text-white/60 text-xs uppercase tracking-wider">
+          <Text className="text-white/60 text-xs uppercase tracking-wider" style={textShadow}>
             {bank.name}
           </Text>
-          <Text className="text-white text-lg font-bold mt-0.5" numberOfLines={1}>
+          <Text className="text-white text-lg font-bold mt-0.5" numberOfLines={1} style={textShadow}>
             {accountName || "Account Name"}
           </Text>
         </View>
         <View className="bg-white/20 rounded-lg px-2.5 py-1">
-          <Text className="text-white text-xs font-medium">
+          <Text className="text-white text-xs font-medium" style={textShadow}>
             {ACCOUNT_TYPE_LABELS[accountType].split(" ")[0]}
           </Text>
         </View>
       </View>
       <View className="mb-6">
-        <Text className="text-white/60 text-xs tracking-widest font-mono">
+        <Text className="text-white/60 text-xs tracking-widest font-mono" style={textShadow}>
           {displayNumber}
         </Text>
       </View>
       <Text
         className="text-white text-2xl font-bold tracking-tight"
-        style={{ fontVariant: ["tabular-nums"] }}
+        style={[textShadow, { fontVariant: ["tabular-nums"] as const }]}
       >
         {formatZAR(balanceCents)}
       </Text>

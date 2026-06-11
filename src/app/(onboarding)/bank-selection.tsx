@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { View, Text, Pressable, ScrollView } from "@/tw";
 import { router } from "expo-router";
 import { BlurView } from "expo-blur";
-import { LinearGradient } from "expo-linear-gradient";
 import { SEED_BANKS, type Bank } from "@/constants/banks";
+import { StepIndicator } from "@/components/step-indicator";
 
 function BankCard({
   bank,
@@ -21,41 +21,36 @@ function BankCard({
         isSelected ? "ring-2 ring-primary" : ""
       }`}
     >
-      {isSelected ? (
-        <LinearGradient
-          colors={[bank.gradientFrom, bank.gradientTo]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          className="px-4 py-6 items-center"
+      <BlurView
+        intensity={18}
+        className={`px-4 py-6 items-center border ${
+          isSelected ? "border-primary/50" : ""
+        }`}
+        style={!isSelected ? { borderColor: `${bank.gradientFrom}30` } : undefined}
+      >
+        <View
+          className="w-10 h-10 rounded-full mb-2.5 items-center justify-center"
+          style={{ backgroundColor: bank.gradientFrom }}
         >
-          <Text className="text-white text-base font-semibold text-center">
-            {bank.shortName}
-          </Text>
-          <Text className="text-white/70 text-xs mt-1 text-center">
-            {bank.name}
-          </Text>
-          <View className="w-6 h-6 rounded-full bg-white/30 items-center justify-center mt-3">
-            <Text className="text-white font-bold text-xs">✓</Text>
-          </View>
-        </LinearGradient>
-      ) : (
-        <BlurView
-          intensity={12}
-          className="px-4 py-6 items-center border"
-          style={{ borderColor: `${bank.gradientFrom}40` }}
+          {isSelected && (
+            <View className="w-5 h-5 rounded-full bg-white/90 items-center justify-center">
+              <Text className="text-xs font-bold" style={{ color: bank.gradientFrom }}>
+                ✓
+              </Text>
+            </View>
+          )}
+        </View>
+        <Text
+          className={`text-base font-semibold text-center ${
+            isSelected ? "text-white" : "text-text-primary"
+          }`}
         >
-          <View
-            className="w-8 h-8 rounded-full mb-2"
-            style={{ backgroundColor: bank.gradientFrom }}
-          />
-          <Text className="text-text-primary text-base font-semibold text-center">
-            {bank.shortName}
-          </Text>
-          <Text className="text-text-muted text-xs mt-0.5 text-center">
-            {bank.name}
-          </Text>
-        </BlurView>
-      )}
+          {bank.shortName}
+        </Text>
+        <Text className="text-text-muted text-xs mt-0.5 text-center">
+          {bank.name}
+        </Text>
+      </BlurView>
     </Pressable>
   );
 }
@@ -69,14 +64,19 @@ export default function BankSelectionScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View className="pt-16 px-6 pb-4">
-        <Pressable onPress={() => router.back()}>
-          <Text className="text-primary text-lg">← Back</Text>
+      <View className="pt-14 px-6">
+        <Pressable
+          className="w-10 h-10 items-center justify-center"
+          style={{ height: 44 }}
+          onPress={() => router.back()}
+        >
+          <Text className="text-text-secondary text-xl">←</Text>
         </Pressable>
       </View>
-      <ScrollView className="flex-1 px-6" contentContainerClassName="pb-6">
+      <StepIndicator currentStep={1} totalSteps={3} />
+      <ScrollView className="flex-1 px-6" contentContainerClassName="pb-4">
         <Text className="text-text-primary text-2xl font-bold mb-1">
-          Select your bank
+          Pick your bank
         </Text>
         <Text className="text-text-muted text-sm mb-6">
           Choose the bank for your first account
@@ -94,9 +94,10 @@ export default function BankSelectionScreen() {
       </ScrollView>
       <View className="px-6 pb-12 pt-4">
         <Pressable
-          className={`py-4 rounded-xl items-center ${
-            selectedBank ? "bg-primary" : "bg-surface"
+          className={`rounded-xl items-center justify-center ${
+            selectedBank ? "bg-primary" : "bg-surface-raised"
           }`}
+          style={{ height: 48, opacity: selectedBank ? 1 : 0.38 }}
           disabled={!selectedBank}
           onPress={() =>
             router.push({

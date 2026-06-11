@@ -12,29 +12,34 @@
 
   /* Text colors */
   --color-text-primary: #F8FAFC;
-  --color-text-muted: #94A3B8;
+  --color-text-muted: #A1A1AA;
+  --color-text-secondary: #E2E8F0;
 
   /* Border */
   --color-border: #334155;
 
   /* Brand / action */
   --color-primary: #1657E8;
+  --color-primary-foreground: #FFFFFF;
 
   /* Logo accent */
   --color-accent: #00AEEF;
+  --color-secondary: #7C3AED;
 
   /* Dark navy from logo */
   --color-navy: #0F1729;
 
-  /* Semantic finance */
-  --color-success: #10B981;
-  --color-warning: #F59E0B;
-  --color-danger: #F43F5E;
+  /* Semantic finance (dark-mode desaturated per Pixel spec) */
+  --color-success: #34D399;
+  --color-warning: #FBBF24;
+  --color-danger: #FB7185;
+  --color-info: #818CF8;
+  --color-gold: #FCD34D;
 
   /* Finance semantic namespace */
-  --color-finance-positive: #10B981;
-  --color-finance-negative: #F43F5E;
-  --color-finance-neutral: #F59E0B;
+  --color-finance-positive: #34D399;
+  --color-finance-negative: #FB7185;
+  --color-finance-neutral: #FBBF24;
 
   /* Spacing scale (matches Tailwind default increments) */
   --spacing-0\.5: 0.125rem;

@@ -1,18 +1,19 @@
-import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput } from "@/tw";
+import React, { useState, useCallback } from "react";
+import { View, Text, Pressable, ScrollView } from "@/tw";
 import { router, useLocalSearchParams } from "expo-router";
 import { SEED_BANKS_MAP } from "@/constants/banks";
 import { BankCard } from "@/features/accounts/components/bank-card";
+import { StepIndicator } from "@/components/step-indicator";
+import { FormInput } from "@/components/form-input";
 import type { AccountType } from "@/features/accounts/types";
-import { ACCOUNT_TYPE_LABELS } from "@/features/accounts/types";
 
-const ACCOUNT_TYPES: AccountType[] = [
-  "cheque",
-  "savings",
-  "credit-card",
-  "investment",
-  "loan",
-  "other",
+const ACCOUNT_TYPE_OPTIONS: { label: string; value: AccountType }[] = [
+  { label: "Cheque", value: "cheque" },
+  { label: "Savings", value: "savings" },
+  { label: "Credit", value: "credit-card" },
+  { label: "Investment", value: "investment" },
+  { label: "Loan", value: "loan" },
+  { label: "Other", value: "other" },
 ];
 
 export default function CreateAccountScreen() {
@@ -24,6 +25,11 @@ export default function CreateAccountScreen() {
   const [balanceStr, setBalanceStr] = useState("");
 
   const balanceCents = Math.round(parseFloat(balanceStr.replace(/,/g, "")) * 100) || 0;
+
+  const handleBalanceChange = useCallback((text: string) => {
+    const cleaned = text.replace(/[^0-9.]/g, "");
+    setBalanceStr(cleaned);
+  }, []);
 
   if (!bank) {
     return (
@@ -38,14 +44,19 @@ export default function CreateAccountScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View className="pt-16 px-6 pb-4">
-        <Pressable onPress={() => router.back()}>
-          <Text className="text-primary text-lg">← Back</Text>
+      <View className="pt-14 px-6">
+        <Pressable
+          className="w-10 h-10 items-center justify-center"
+          style={{ height: 44 }}
+          onPress={() => router.back()}
+        >
+          <Text className="text-text-secondary text-xl">←</Text>
         </Pressable>
       </View>
-      <ScrollView className="flex-1 px-6" contentContainerClassName="pb-8">
+      <StepIndicator currentStep={2} totalSteps={3} />
+      <ScrollView className="flex-1 px-6" contentContainerClassName="pb-6">
         <Text className="text-text-primary text-2xl font-bold mb-1">
-          Create Account
+          Name your account
         </Text>
         <Text className="text-text-muted text-sm mb-6">
           Set up your {bank.shortName} account
@@ -59,68 +70,59 @@ export default function CreateAccountScreen() {
         />
 
         <View className="mt-8 gap-5">
-          <View>
-            <Text className="text-text-muted text-sm mb-2">Account Name</Text>
-            <TextInput
-              className="bg-surface text-text-primary rounded-xl px-4 py-3.5 text-base border border-border"
-              placeholder="e.g. My Spending Account"
-              placeholderTextColor="#94A3B8"
-              value={name}
-              onChangeText={setName}
-            />
+          <FormInput
+            label="Account Name"
+            value={name}
+            onChangeText={setName}
+            placeholder="My Spending Account"
+            autoCapitalize="sentences"
+          />
+
+          <View className="gap-1.5">
+            <Text className="text-text-muted text-sm">Account Type</Text>
+            <View className="flex-row flex-wrap" style={{ marginHorizontal: -4 }}>
+              {ACCOUNT_TYPE_OPTIONS.map((option) => {
+                const isSelected = option.value === type;
+                return (
+                  <View key={option.value} style={{ width: "33.33%", paddingHorizontal: 4, marginBottom: 8 }}>
+                    <Pressable
+                      className={`rounded-xl items-center justify-center ${
+                        isSelected ? "bg-primary" : "bg-surface-raised border border-border"
+                      }`}
+                      style={{ height: 44 }}
+                      onPress={() => setType(option.value)}
+                    >
+                      <Text
+                        className={`text-sm ${
+                          isSelected ? "text-white font-semibold" : "text-text-muted"
+                        }`}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  </View>
+                );
+              })}
+            </View>
           </View>
 
-          <View>
-            <Text className="text-text-muted text-sm mb-2">Account Type</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="gap-2"
-            >
-              {ACCOUNT_TYPES.map((t) => (
-                <Pressable
-                  key={t}
-                  className={`rounded-xl px-4 py-3 ${
-                    type === t ? "bg-primary" : "bg-surface border border-border"
-                  }`}
-                  onPress={() => setType(t)}
-                >
-                  <Text
-                    className={`text-sm ${
-                      type === t ? "text-white font-semibold" : "text-text-muted"
-                    }`}
-                  >
-                    {ACCOUNT_TYPE_LABELS[t]}
-                  </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
-
-          <View>
-            <Text className="text-text-muted text-sm mb-2">Opening Balance (ZAR)</Text>
-            <TextInput
-              className="bg-surface text-text-primary rounded-xl px-4 py-3.5 text-base border border-border"
-              placeholder="0.00"
-              placeholderTextColor="#94A3B8"
-              keyboardType="decimal-pad"
-              value={balanceStr}
-              onChangeText={setBalanceStr}
-            />
-          </View>
+          <FormInput
+            label="Opening Balance (ZAR)"
+            value={balanceStr}
+            onChangeText={handleBalanceChange}
+            placeholder="0.00"
+            keyboardType="decimal-pad"
+          />
         </View>
       </ScrollView>
       <View className="px-6 pb-12 pt-4">
         <Pressable
           className="bg-primary py-4 rounded-xl items-center active:opacity-80"
+          style={{ height: 48 }}
           onPress={() =>
             router.push({
               pathname: "/",
-              params: {
-                created: "true",
-                bankId: bank.id,
-                accountName: name || "My Account",
-              },
+              params: { created: "true" },
             })
           }
         >
