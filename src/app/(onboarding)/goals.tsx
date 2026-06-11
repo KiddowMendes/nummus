@@ -1,10 +1,8 @@
-// app/(onboarding)/goals.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
 import Animated, {
   useSharedValue,
-  useAnimatedProps,
   useAnimatedStyle,
   withTiming,
   withDelay,
@@ -20,25 +18,22 @@ import { NummusButton } from "@/components/ui/nummusButton";
 import { colors } from "@/constants/theme";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
-const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-// ─── Mountain Peak Illustration ───────────────────────────────────
+// ─── Mountain Peak Illustration — FIXED: No useAnimatedProps on SVG ──
 
-function MountainPeak({ size = 200 }: { size?: number }) {
-  const layer1 = useSharedValue(0);
-  const layer2 = useSharedValue(0);
-  const layer3 = useSharedValue(0);
-  const flagWave = useSharedValue(0);
+function MountainPeak({ size = 180 }: { size?: number }) {
+  const layer1Y = useSharedValue(30);
+  const layer2Y = useSharedValue(20);
+  const layer3Y = useSharedValue(10);
+  const flagScale = useSharedValue(0);
   const glowPulse = useSharedValue(0);
-  const scale = size / 200;
 
   useEffect(() => {
-    layer1.value = withDelay(300, withTiming(1, { duration: 600, easing: Easing.out(Easing.back(1.2)) }));
-    layer2.value = withDelay(500, withTiming(1, { duration: 600, easing: Easing.out(Easing.back(1.2)) }));
-    layer3.value = withDelay(700, withTiming(1, { duration: 600, easing: Easing.out(Easing.back(1.2)) }));
-
-    flagWave.value = withDelay(1000, withSpring(1, { damping: 12, stiffness: 150 }));
-
+    // Animate layers sliding up
+    layer1Y.value = withDelay(300, withTiming(0, { duration: 600, easing: Easing.out(Easing.back(1.2)) }));
+    layer2Y.value = withDelay(500, withTiming(0, { duration: 600, easing: Easing.out(Easing.back(1.2)) }));
+    layer3Y.value = withDelay(700, withTiming(0, { duration: 600, easing: Easing.out(Easing.back(1.2)) }));
+    flagScale.value = withDelay(1000, withSpring(1, { damping: 12, stiffness: 150 }));
     glowPulse.value = withDelay(
       1400,
       withRepeat(
@@ -52,144 +47,120 @@ function MountainPeak({ size = 200 }: { size?: number }) {
     );
   }, []);
 
-  const layer1Props = useAnimatedProps(() => ({
-    opacity: layer1.value,
-    transform: `translate(0, ${interpolate(layer1.value, [0, 1], [30, 0])})` as const,
+  const layer1Style = useAnimatedStyle(() => ({
+    transform: [{ translateY: layer1Y.value }],
+    opacity: interpolate(layer1Y.value, [30, 0], [0, 1]),
   }));
 
-  const layer2Props = useAnimatedProps(() => ({
-    opacity: layer2.value,
-    transform: `translate(0, ${interpolate(layer2.value, [0, 1], [20, 0])})` as const,
+  const layer2Style = useAnimatedStyle(() => ({
+    transform: [{ translateY: layer2Y.value }],
+    opacity: interpolate(layer2Y.value, [20, 0], [0, 1]),
   }));
 
-  const layer3Props = useAnimatedProps(() => ({
-    opacity: layer3.value,
-    transform: `translate(0, ${interpolate(layer3.value, [0, 1], [10, 0])})` as const,
+  const layer3Style = useAnimatedStyle(() => ({
+    transform: [{ translateY: layer3Y.value }],
+    opacity: interpolate(layer3Y.value, [10, 0], [0, 1]),
   }));
 
-  const flagProps = useAnimatedProps(() => ({
-    opacity: flagWave.value,
-    transform: `translate(0, 0) scale(${interpolate(flagWave.value, [0, 1], [0.5, 1])}) rotate(${interpolate(flagWave.value, [0, 1], [-10, 0])} 0 0)` as const,
+  const flagStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: flagScale.value }, { rotateZ: `${interpolate(flagScale.value, [0, 1], [-10, 0])}deg` }],
+    opacity: flagScale.value,
   }));
 
   const glowStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(glowPulse.value, [0.3, 1], [0.08, 0.2]),
-    transform: [{ scale: interpolate(glowPulse.value, [0.3, 1], [0.9, 1.1]) }],
+    opacity: interpolate(glowPulse.value, [0.3, 1], [0.06, 0.15]),
   }));
+
+  const scale = size / 200;
 
   return (
     <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
-      {/* Gold glow */}
+      {/* Glow */}
       <Animated.View
         style={[
           {
             position: "absolute",
-            width: size * 1.4,
-            height: size * 1.4,
-            borderRadius: (size * 1.4) / 2,
+            width: size * 1.3,
+            height: size * 1.3,
+            borderRadius: (size * 1.3) / 2,
             backgroundColor: colors.gold,
           },
           glowStyle,
         ]}
       />
 
-      <Svg width={size} height={size} viewBox="0 0 200 200">
-        <Defs>
-          <LinearGradient id="layer1" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0%" stopColor="#1E293B" stopOpacity="0.9" />
-            <Stop offset="100%" stopColor="#111827" stopOpacity="0.95" />
-          </LinearGradient>
-          <LinearGradient id="layer2" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0%" stopColor="#334155" stopOpacity="0.8" />
-            <Stop offset="100%" stopColor="#1E293B" stopOpacity="0.9" />
-          </LinearGradient>
-          <LinearGradient id="layer3" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0%" stopColor="#475569" stopOpacity="0.7" />
-            <Stop offset="100%" stopColor="#334155" stopOpacity="0.8" />
-          </LinearGradient>
-          <LinearGradient id="flagGold" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0%" stopColor="#FDE68A" />
-            <Stop offset="100%" stopColor="#F59E0B" />
-          </LinearGradient>
-        </Defs>
+      {/* Layer 1 — Base mountain (wrapped in Animated.View, NOT animating SVG props) */}
+      <Animated.View style={[{ position: "absolute", bottom: 0 }, layer1Style]}>
+        <Svg width={size} height={size * 0.6} viewBox="0 0 200 120">
+          <Defs>
+            <LinearGradient id="layer1" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0%" stopColor="#1E293B" stopOpacity="0.9" />
+              <Stop offset="100%" stopColor="#111827" stopOpacity="0.95" />
+            </LinearGradient>
+          </Defs>
+          <Path d="M0 120 L100 20 L200 120 Z" fill="url(#layer1)" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+        </Svg>
+      </Animated.View>
 
-        {/* Layer 1 - Base mountain */}
-        <AnimatedPath
-          d="M20 180 L100 80 L180 180 Z"
-          fill="url(#layer1)"
-          stroke="rgba(255,255,255,0.06)"
-          strokeWidth="1"
-          animatedProps={layer1Props}
-        />
+      {/* Layer 2 */}
+      <Animated.View style={[{ position: "absolute", bottom: 0 }, layer2Style]}>
+        <Svg width={size * 0.8} height={size * 0.65} viewBox="0 0 160 130">
+          <Defs>
+            <LinearGradient id="layer2" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0%" stopColor="#334155" stopOpacity="0.8" />
+              <Stop offset="100%" stopColor="#1E293B" stopOpacity="0.9" />
+            </LinearGradient>
+          </Defs>
+          <Path d="M0 130 L80 10 L160 130 Z" fill="url(#layer2)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+        </Svg>
+      </Animated.View>
 
-        {/* Layer 2 - Mid mountain */}
-        <AnimatedPath
-          d="M40 180 L100 50 L160 180 Z"
-          fill="url(#layer2)"
-          stroke="rgba(255,255,255,0.08)"
-          strokeWidth="1"
-          animatedProps={layer2Props}
-        />
+      {/* Layer 3 — Peak */}
+      <Animated.View style={[{ position: "absolute", bottom: 0 }, layer3Style]}>
+        <Svg width={size * 0.6} height={size * 0.7} viewBox="0 0 120 140">
+          <Defs>
+            <LinearGradient id="layer3" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0%" stopColor="#475569" stopOpacity="0.7" />
+              <Stop offset="100%" stopColor="#334155" stopOpacity="0.8" />
+            </LinearGradient>
+            <LinearGradient id="flagGold" x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0%" stopColor="#FDE68A" />
+              <Stop offset="100%" stopColor="#F59E0B" />
+            </LinearGradient>
+          </Defs>
+          <Path d="M0 140 L60 0 L120 140 Z" fill="url(#layer3)" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+          {/* Snow cap */}
+          <Path d="M45 35 L60 0 L75 35 Q60 40 45 35 Z" fill="rgba(255,255,255,0.12)" />
+        </Svg>
+      </Animated.View>
 
-        {/* Layer 3 - Peak */}
-        <AnimatedPath
-          d="M60 180 L100 20 L140 180 Z"
-          fill="url(#layer3)"
-          stroke="rgba(255,255,255,0.1)"
-          strokeWidth="1"
-          animatedProps={layer3Props}
-        />
-
-        {/* Snow cap on peak */}
-        <AnimatedPath
-          d="M85 55 L100 20 L115 55 Q100 60 85 55 Z"
-          fill="rgba(255,255,255,0.15)"
-          animatedProps={layer3Props}
-        />
-
-        {/* Flag pole */}
-        <AnimatedPath
-          d="M100 20 L100 5"
-          stroke="#FCD34D"
-          strokeWidth="2"
-          strokeLinecap="round"
-          animatedProps={flagProps}
-        />
-
-        {/* Flag */}
-        <AnimatedView style={[{ position: "absolute", left: 100 * scale - 2, top: 5 * scale }, useAnimatedStyle(() => ({
-          opacity: flagWave.value,
-          transform: [
-            { scale: interpolate(flagWave.value, [0, 1], [0.5, 1]) },
-            { rotateZ: `${interpolate(flagWave.value, [0, 1], [-10, 0])}deg` },
-          ],
-        }))]}>
-          <Svg width={24 * scale} height={16 * scale} viewBox="0 0 24 16">
-            <Polygon points="0,0 20,6 0,12" fill="url(#flagGold)" />
-          </Svg>
-        </AnimatedView>
-
-        {/* Summit glow dot */}
-        <Animated.View
-          style={[
-            {
-              position: "absolute",
-              left: 96 * scale,
-              top: 16 * scale,
-              width: 8 * scale,
-              height: 8 * scale,
-              borderRadius: 4 * scale,
-              backgroundColor: colors.gold,
-            },
-            glowStyle,
-          ]}
-        />
-      </Svg>
+      {/* Flag — separate animated view on top */}
+      <Animated.View
+        style={[
+          {
+            position: "absolute",
+            top: size * 0.12,
+            left: size * 0.46,
+          },
+          flagStyle,
+        ]}
+      >
+        <Svg width={24} height={32} viewBox="0 0 24 32">
+          <Defs>
+            <LinearGradient id="flagGrad" x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0%" stopColor="#FDE68A" />
+              <Stop offset="100%" stopColor="#F59E0B" />
+            </LinearGradient>
+          </Defs>
+          <Path d="M12 32 L12 8" stroke="#FCD34D" strokeWidth="2" strokeLinecap="round" />
+          <Polygon points="12,8 32,14 12,20" fill="url(#flagGrad)" />
+        </Svg>
+      </Animated.View>
     </View>
   );
 }
 
-// ─── Goal Templates ────────────────────────────────────────────────
+// ─── Goal Templates & Main Screen (unchanged logic, fixed layout) ──
 
 const GOAL_TEMPLATES = [
   { id: "emergency", icon: "🚨", name: "Emergency Fund", target: 5000, color: "#EF4444" },
@@ -239,8 +210,6 @@ function GoalTemplateCard({
     </Pressable>
   );
 }
-
-// ─── Main Screen ───────────────────────────────────────────────────
 
 export default function GoalsScreen() {
   const [goalName, setGoalName] = useState("");
@@ -300,22 +269,11 @@ export default function GoalsScreen() {
         </AnimatedView>
       }
     >
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 24 }}
-      >
+      <View style={{ paddingTop: 8 }}>
         {/* Illustration */}
-        <AnimatedView
-          style={[
-            { alignItems: "center", marginTop: 8, marginBottom: 28 },
-            useAnimatedStyle(() => ({
-              opacity: withDelay(100, withTiming(1, { duration: 600 })),
-              transform: [{ scale: withDelay(100, withTiming(1, { duration: 600, easing: Easing.out(Easing.back(1.5)) })) }],
-            })),
-          ]}
-        >
-          <MountainPeak size={180} />
-        </AnimatedView>
+        <View style={{ alignItems: "center", marginBottom: 24 }}>
+          <MountainPeak size={160} />
+        </View>
 
         {/* Header */}
         <AnimatedView style={[{ alignItems: "center", marginBottom: 24 }, contentStyle]}>
@@ -434,7 +392,7 @@ export default function GoalsScreen() {
             />
           </View>
         </AnimatedView>
-      </ScrollView>
+      </View>
     </OnboardingScreenWrapper>
   );
 }

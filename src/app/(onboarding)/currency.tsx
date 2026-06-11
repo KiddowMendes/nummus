@@ -1,11 +1,9 @@
-// app/(onboarding)/currency.tsx
 import React, { useEffect } from "react";
 import { View, Text } from "react-native";
 import { router } from "expo-router";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  useAnimatedProps,
   withTiming,
   withDelay,
   withRepeat,
@@ -16,6 +14,7 @@ import Animated, {
 import Svg, { Circle, Path, Defs, LinearGradient, Stop } from "react-native-svg";
 import { OnboardingScreenWrapper } from "@/components/onboardingScreenWrapper";
 import { NummusButton } from "@/components/ui/nummusButton";
+import { EntranceView } from "@/components/entrance-view";
 import { colors } from "@/constants/theme";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
@@ -165,17 +164,9 @@ export default function CurrencyScreen() {
     >
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         {/* ZAR Coin Animation */}
-        <AnimatedView
-          style={[
-            { marginBottom: 32 },
-            useAnimatedStyle(() => ({
-              opacity: withDelay(100, withTiming(1, { duration: 500 })),
-              transform: [{ scale: withDelay(100, withTiming(1, { duration: 600, easing: Easing.out(Easing.back(1.5)) })) }],
-            })),
-          ]}
-        >
+        <EntranceView delay={100} style={{ marginBottom: 32 }}>
           <ZARCoin size={160} />
-        </AnimatedView>
+        </EntranceView>
 
         <AnimatedView style={[{ alignItems: "center" }, contentStyle]}>
           <Text

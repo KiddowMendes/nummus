@@ -1,16 +1,22 @@
-// components/OnboardingScreenWrapper.tsx
 import React from "react";
-import { View, type ViewStyle } from "react-native";
+import {
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  type ViewStyle,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { OnboardingProgress } from "./onboardingProgress";
 import { colors } from "@/constants/theme";
 
 interface OnboardingScreenWrapperProps {
-  step: number; // 0-indexed (0-7)
+  step: number;
   glowColor?: string;
   children: React.ReactNode;
   bottomContent?: React.ReactNode;
   style?: ViewStyle;
+  scrollable?: boolean;
 }
 
 export function OnboardingScreenWrapper({
@@ -19,36 +25,77 @@ export function OnboardingScreenWrapper({
   children,
   bottomContent,
   style,
+  scrollable = true,
 }: OnboardingScreenWrapperProps) {
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Ambient glow */}
+  const content = (
+    <View style={[{ flex: 1 }, style]}>
+      {/* Ambient glow — contained within layout, not absolute to viewport */}
       <View
         style={{
           position: "absolute",
-          top: "10%",
-          left: "50%",
-          marginLeft: -150,
-          width: 300,
-          height: 300,
-          borderRadius: 150,
+          top: 60,
+          alignSelf: "center",
+          width: 280,
+          height: 280,
+          borderRadius: 140,
           backgroundColor: glowColor,
-          opacity: 0.08,
+          opacity: 0.06,
+          zIndex: 0,
         }}
         pointerEvents="none"
       />
 
       <OnboardingProgress currentStep={step} />
 
-      <View style={[{ flex: 1, paddingHorizontal: 24 }, style]}>
-        {children}
+      <View style={{ flex: 1, zIndex: 1 }}>
+        {scrollable ? (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingHorizontal: 24,
+              paddingBottom: 24,
+            }}
+            keyboardShouldPersistTaps="handled"
+          >
+            {children}
+          </ScrollView>
+        ) : (
+          <View style={{ flex: 1, paddingHorizontal: 24 }}>{children}</View>
+        )}
       </View>
 
       {bottomContent && (
-        <View style={{ paddingHorizontal: 24, paddingBottom: 32, gap: 12 }}>
+        <View
+          style={{
+            paddingHorizontal: 24,
+            paddingBottom: 32,
+            paddingTop: 12,
+            zIndex: 2,
+            backgroundColor: colors.background,
+          }}
+        >
           {bottomContent}
         </View>
       )}
+    </View>
+  );
+
+  if (Platform.OS === "ios") {
+    return (
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: colors.background }}
+        behavior="padding"
+        keyboardVerticalOffset={0}
+      >
+        <SafeAreaView style={{ flex: 1 }}>{content}</SafeAreaView>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      {content}
     </SafeAreaView>
   );
 }

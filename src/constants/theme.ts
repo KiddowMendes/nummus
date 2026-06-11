@@ -17,7 +17,7 @@ export const colors = {
   textDisabled: '#64748B',     // 38% — Inactive
 
   // Brand
-  primary: '#4F46E5',          // Indigo — Buttons, links, active
+  primary: '#1657E8',          // Brand indigo (from logo SVG) — Buttons, links, active
   primaryForeground: '#FFFFFF',
   secondary: '#7C3AED',        // Violet — Accents, highlights
   accent: '#00AEEF',           // Cyan — Logo accent (from your logo)

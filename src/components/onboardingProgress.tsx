@@ -1,15 +1,14 @@
-// components/OnboardingProgress.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import { View } from "react-native";
 import Animated, {
+  useSharedValue,
   useAnimatedStyle,
   withSpring,
-  interpolateColor,
 } from "react-native-reanimated";
 import { colors } from "@/constants/theme";
 
 interface OnboardingProgressProps {
-  currentStep: number; // 0-indexed (0-7)
+  currentStep: number;
   totalSteps?: number;
 }
 
@@ -26,23 +25,18 @@ export function OnboardingProgress({
         alignItems: "center",
         justifyContent: "center",
         gap: 8,
-        paddingTop: 16,
+        paddingTop: 12,
         paddingBottom: 8,
+        height: 36,
       }}
     >
-      {Array.from({ length: totalSteps }, (_, i) => {
-        const isActive = i === currentStep;
-        const isCompleted = i < currentStep;
-
-        return (
-          <Dot
-            key={i}
-            isActive={isActive}
-            isCompleted={isCompleted}
-            step={i}
-          />
-        );
-      })}
+      {Array.from({ length: totalSteps }, (_, i) => (
+        <Dot
+          key={i}
+          isActive={i === currentStep}
+          isCompleted={i < currentStep}
+        />
+      ))}
     </View>
   );
 }
@@ -50,27 +44,38 @@ export function OnboardingProgress({
 function Dot({
   isActive,
   isCompleted,
-  step,
 }: {
   isActive: boolean;
   isCompleted: boolean;
-  step: number;
 }) {
-  const animatedStyle = useAnimatedStyle(() => {
-    const size = isActive ? 10 : 8;
-    const backgroundColor = isActive
-      ? colors.primary
-      : isCompleted
-      ? `${colors.primary}66` // 40% opacity
-      : colors.hover;
+  const size = useSharedValue(8);
+  const scale = useSharedValue(1);
+  const activeSV = useSharedValue(isActive);
+  const completedSV = useSharedValue(isCompleted);
 
-    return {
-      width: withSpring(size, { damping: 15, stiffness: 300 }),
-      height: withSpring(size, { damping: 15, stiffness: 300 }),
-      backgroundColor,
-      transform: [{ scale: isActive ? withSpring(1.2) : 1 }],
-    };
-  });
+  // Sync shared values from props
+  useEffect(() => {
+    activeSV.value = isActive;
+    completedSV.value = isCompleted;
+    if (isActive) {
+      size.value = withSpring(10, { damping: 15, stiffness: 300 });
+      scale.value = withSpring(1.2, { damping: 15, stiffness: 300 });
+    } else {
+      size.value = withSpring(8, { damping: 15, stiffness: 300 });
+      scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+    }
+  }, [isActive]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    width: size.value,
+    height: size.value,
+    backgroundColor: activeSV.value
+      ? colors.primary
+      : completedSV.value
+      ? `${colors.primary}66`
+      : colors.hover,
+    transform: [{ scale: scale.value }],
+  }));
 
   return (
     <AnimatedView

@@ -1,4 +1,3 @@
-// app/(onboarding)/complete.tsx
 import React, { useEffect } from "react";
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
@@ -17,6 +16,7 @@ import Animated, {
 import Svg, { Circle, Path, Defs, LinearGradient, Stop, Polygon } from "react-native-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NummusButton } from "@/components/ui/nummusButton";
+import { EntranceView } from "@/components/entrance-view";
 import { colors } from "@/constants/theme";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
@@ -519,16 +519,9 @@ export default function CompleteScreen() {
 
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24 }}>
         {/* Celebration Coin */}
-        <AnimatedView
-          style={[
-            { marginBottom: 32 },
-            useAnimatedStyle(() => ({
-              opacity: withDelay(100, withTiming(1, { duration: 500 })),
-            })),
-          ]}
-        >
+        <EntranceView delay={100} style={{ marginBottom: 32 }}>
           <CelebrationCoin size={160} />
-        </AnimatedView>
+        </EntranceView>
 
         {/* Level Badge */}
         <LevelBadge />

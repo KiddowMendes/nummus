@@ -1,10 +1,8 @@
-// app/(onboarding)/budget.tsx
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
+import { View, Text, TextInput, Pressable } from "react-native";
 import { router } from "expo-router";
 import Animated, {
   useSharedValue,
-  useAnimatedProps,
   useAnimatedStyle,
   withTiming,
   withDelay,
@@ -20,31 +18,21 @@ import { NummusButton } from "@/components/ui/nummusButton";
 import { colors } from "@/constants/theme";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-// ─── Budget Ring Illustration ─────────────────────────────────────
+// ─── Budget Ring — FIXED: No useAnimatedProps on Circle ─────────────
 
-function BudgetRing({
-  size = 200,
-  targetProgress = 0.7,
-}: {
-  size?: number;
-  targetProgress?: number;
-}) {
+function BudgetRing({ size = 160 }: { size?: number }) {
   const progress = useSharedValue(0);
   const glowPulse = useSharedValue(0);
-  const centerScale = useSharedValue(0.8);
+  const centerScale = useSharedValue(0);
 
-  const strokeWidth = 14;
+  const strokeWidth = 12;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const center = size / 2;
 
   useEffect(() => {
-    progress.value = withDelay(400, withTiming(targetProgress, { duration: 1500, easing: Easing.out(Easing.cubic) }));
-
+    progress.value = withDelay(400, withTiming(0.7, { duration: 1500, easing: Easing.out(Easing.cubic) }));
     centerScale.value = withDelay(800, withSpring(1, { damping: 12, stiffness: 200 }));
-
     glowPulse.value = withDelay(
       1200,
       withRepeat(
@@ -58,104 +46,111 @@ function BudgetRing({
     );
   }, []);
 
-  const ringAnimatedProps = useAnimatedProps(() => ({
-    strokeDashoffset: interpolate(progress.value, [0, 1], [circumference, 0]),
+  // Animate the strokeDashoffset via a wrapper View's width/opacity instead
+  const ringContainerStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0, 0.1], [0, 1]),
   }));
 
   const glowStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(glowPulse.value, [0.3, 1], [0.08, 0.2]),
+    opacity: interpolate(glowPulse.value, [0.3, 1], [0.06, 0.15]),
     transform: [{ scale: interpolate(glowPulse.value, [0.3, 1], [0.9, 1.1]) }],
   }));
 
   const centerStyle = useAnimatedStyle(() => ({
     transform: [{ scale: centerScale.value }],
-    opacity: interpolate(centerScale.value, [0.8, 1], [0, 1]),
+    opacity: centerScale.value,
   }));
+
+  // Calculate current dashoffset based on progress
+  const currentOffset = circumference * (1 - 0.7); // 70% filled
 
   return (
     <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
-      {/* Indigo-violet glow */}
       <Animated.View
         style={[
           {
             position: "absolute",
-            width: size * 1.4,
-            height: size * 1.4,
-            borderRadius: (size * 1.4) / 2,
+            width: size * 1.3,
+            height: size * 1.3,
+            borderRadius: (size * 1.3) / 2,
             backgroundColor: colors.primary,
           },
           glowStyle,
         ]}
       />
 
-      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <Defs>
-          <LinearGradient id="ringGradient" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0%" stopColor="#4F46E5" />
-            <Stop offset="50%" stopColor="#7C3AED" />
-            <Stop offset="100%" stopColor="#A855F7" />
-          </LinearGradient>
-          <LinearGradient id="trackGradient" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0%" stopColor="rgba(79,70,229,0.1)" />
-            <Stop offset="100%" stopColor="rgba(124,58,237,0.05)" />
-          </LinearGradient>
-        </Defs>
+      <Animated.View style={ringContainerStyle}>
+        <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          <Defs>
+            <LinearGradient id="ringGradient" x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0%" stopColor="#4F46E5" />
+              <Stop offset="50%" stopColor="#7C3AED" />
+              <Stop offset="100%" stopColor="#A855F7" />
+            </LinearGradient>
+            <LinearGradient id="trackGradient" x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0%" stopColor="rgba(79,70,229,0.1)" />
+              <Stop offset="100%" stopColor="rgba(124,58,237,0.05)" />
+            </LinearGradient>
+          </Defs>
 
-        {/* Background track */}
-        <Circle
-          cx={center}
-          cy={center}
-          r={radius}
-          fill="none"
-          stroke="url(#trackGradient)"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-        />
+          {/* Background track */}
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="url(#trackGradient)"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+          />
 
-        {/* Progress ring */}
-        <AnimatedCircle
-          cx={center}
-          cy={center}
-          r={radius}
-          fill="none"
-          stroke="url(#ringGradient)"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          animatedProps={ringAnimatedProps}
-          transform={`rotate(-90, ${center}, ${center})`}
-        />
+          {/* Progress ring — static offset, animated via parent opacity */}
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="url(#ringGradient)"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={currentOffset}
+            transform={`rotate(-90, ${size / 2}, ${size / 2})`}
+          />
 
-        {/* Decorative ticks around ring */}
-        {Array.from({ length: 12 }, (_, i) => {
-          const angle = (i * 30 * Math.PI) / 180;
-          const x1 = center + (radius - 20) * Math.cos(angle);
-          const y1 = center + (radius - 20) * Math.sin(angle);
-          const x2 = center + (radius - 12) * Math.cos(angle);
-          const y2 = center + (radius - 12) * Math.sin(angle);
-          return (
-            <Line
-              key={i}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="rgba(255,255,255,0.1)"
-              strokeWidth={2}
-              strokeLinecap="round"
-            />
-          );
-        })}
-      </Svg>
+          {/* Ticks */}
+          {Array.from({ length: 12 }, (_, i) => {
+            const angle = (i * 30 * Math.PI) / 180;
+            const cx = size / 2;
+            const cy = size / 2;
+            const x1 = cx + (radius - 18) * Math.cos(angle);
+            const y1 = cy + (radius - 18) * Math.sin(angle);
+            const x2 = cx + (radius - 10) * Math.cos(angle);
+            const y2 = cy + (radius - 10) * Math.sin(angle);
+            return (
+              <Line
+                key={i}
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                stroke="rgba(255,255,255,0.1)"
+                strokeWidth={2}
+                strokeLinecap="round"
+              />
+            );
+          })}
+        </Svg>
+      </Animated.View>
 
       {/* Center badge */}
       <AnimatedView
         style={[
           {
             position: "absolute",
-            width: 80,
-            height: 80,
-            borderRadius: 40,
+            width: 72,
+            height: 72,
+            borderRadius: 36,
             backgroundColor: colors.surface,
             borderWidth: 1,
             borderColor: "rgba(124,58,237,0.3)",
@@ -165,17 +160,8 @@ function BudgetRing({
           centerStyle,
         ]}
       >
-        <Text style={{ fontSize: 24, fontWeight: "700", color: colors.textPrimary }}>
-          🎯
-        </Text>
-        <Text
-          style={{
-            fontSize: 11,
-            fontWeight: "600",
-            color: colors.secondary,
-            marginTop: 2,
-          }}
-        >
+        <Text style={{ fontSize: 22 }}>🎯</Text>
+        <Text style={{ fontSize: 10, fontWeight: "600", color: colors.secondary, marginTop: 2 }}>
           BUDGET
         </Text>
       </AnimatedView>
@@ -183,7 +169,7 @@ function BudgetRing({
   );
 }
 
-// ─── Category Chips ────────────────────────────────────────────────
+// ─── Category Chips (unchanged) ──────────────────────────────────────
 
 const CATEGORIES = [
   { id: "food", label: "🍔 Food", color: "#F59E0B" },
@@ -196,17 +182,7 @@ const CATEGORIES = [
   { id: "other", label: "✏️ Other", color: "#6B7280" },
 ];
 
-function CategoryChip({
-  label,
-  color,
-  isSelected,
-  onPress,
-}: {
-  label: string;
-  color: string;
-  isSelected: boolean;
-  onPress: () => void;
-}) {
+function CategoryChip({ label, color, isSelected, onPress }: any) {
   return (
     <Pressable
       onPress={onPress}
@@ -219,13 +195,7 @@ function CategoryChip({
         borderColor: isSelected ? color : colors.hover,
       }}
     >
-      <Text
-        style={{
-          fontSize: 13,
-          fontWeight: isSelected ? "600" : "400",
-          color: isSelected ? color : colors.textSecondary,
-        }}
-      >
+      <Text style={{ fontSize: 13, fontWeight: isSelected ? "600" : "400", color: isSelected ? color : colors.textSecondary }}>
         {label}
       </Text>
     </Pressable>
@@ -235,7 +205,7 @@ function CategoryChip({
 // ─── Main Screen ───────────────────────────────────────────────────
 
 export default function BudgetScreen() {
-  const [category, setCategory] = useState<string>("");
+  const [category, setCategory] = useState("");
   const [budgetName, setBudgetName] = useState("");
   const [amount, setAmount] = useState("");
   const [period, setPeriod] = useState<"monthly" | "weekly">("monthly");
@@ -260,7 +230,6 @@ export default function BudgetScreen() {
   }, []);
 
   const isValid = category.length > 0 && budgetName.trim().length >= 2 && amount.length > 0;
-
   const selectedCategory = CATEGORIES.find((c) => c.id === category);
 
   return (
@@ -269,106 +238,44 @@ export default function BudgetScreen() {
       glowColor={colors.secondary}
       bottomContent={
         <AnimatedView style={contentStyle}>
-          <NummusButton
-            variant="primary"
-            size="lg"
-            disabled={!isValid}
-            onPress={() => router.push("/goals")}
-          >
+          <NummusButton variant="primary" size="lg" disabled={!isValid} onPress={() => router.push("/goals")}>
             Continue
           </NummusButton>
-          <Pressable
-            onPress={() => router.push("/goals")}
-            style={{ alignItems: "center", paddingVertical: 12 }}
-          >
-            <Text style={{ fontSize: 14, color: colors.textMuted }}>
-              Skip for now
-            </Text>
+          <Pressable onPress={() => router.push("/goals")} style={{ alignItems: "center", paddingVertical: 12 }}>
+            <Text style={{ fontSize: 14, color: colors.textMuted }}>Skip for now</Text>
           </Pressable>
         </AnimatedView>
       }
     >
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 24 }}
-      >
+      <View style={{ paddingTop: 8 }}>
         {/* Illustration */}
-        <AnimatedView
-          style={[
-            { alignItems: "center", marginTop: 8, marginBottom: 28 },
-            useAnimatedStyle(() => ({
-              opacity: withDelay(100, withTiming(1, { duration: 600 })),
-              transform: [{ scale: withDelay(100, withTiming(1, { duration: 600, easing: Easing.out(Easing.back(1.5)) })) }],
-            })),
-          ]}
-        >
-          <BudgetRing size={180} targetProgress={0.7} />
-        </AnimatedView>
+        <View style={{ alignItems: "center", marginBottom: 24 }}>
+          <BudgetRing size={160} />
+        </View>
 
         {/* Header */}
         <AnimatedView style={[{ alignItems: "center", marginBottom: 24 }, contentStyle]}>
-          <Text
-            style={{
-              fontSize: 28,
-              fontWeight: "700",
-              color: colors.textPrimary,
-              textAlign: "center",
-              marginBottom: 8,
-              letterSpacing: -0.5,
-            }}
-          >
+          <Text style={{ fontSize: 28, fontWeight: "700", color: colors.textPrimary, textAlign: "center", marginBottom: 8, letterSpacing: -0.5 }}>
             Set a Budget
           </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              color: colors.textSecondary,
-              textAlign: "center",
-              lineHeight: 24,
-              maxWidth: 300,
-            }}
-          >
-            Pick a category and set a monthly limit. We\u2019ll warn you before you overspend.
+          <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: "center", lineHeight: 24, maxWidth: 300 }}>
+            Pick a category and set a monthly limit. We&apos;ll warn you before you overspend.
           </Text>
         </AnimatedView>
 
         {/* Form */}
         <AnimatedView style={[{ gap: 20 }, contentStyle]}>
-          {/* Category Selection */}
           <View>
-            <Text
-              style={{
-                fontSize: 14,
-                color: colors.textMuted,
-                marginBottom: 10,
-              }}
-            >
-              Pick a Category
-            </Text>
+            <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 10 }}>Pick a Category</Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
               {CATEGORIES.map((cat) => (
-                <CategoryChip
-                  key={cat.id}
-                  label={cat.label}
-                  color={cat.color}
-                  isSelected={category === cat.id}
-                  onPress={() => setCategory(cat.id)}
-                />
+                <CategoryChip key={cat.id} label={cat.label} color={cat.color} isSelected={category === cat.id} onPress={() => setCategory(cat.id)} />
               ))}
             </View>
           </View>
 
-          {/* Budget Name */}
           <View>
-            <Text
-              style={{
-                fontSize: 14,
-                color: colors.textMuted,
-                marginBottom: 8,
-              }}
-            >
-              Budget Name
-            </Text>
+            <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 8 }}>Budget Name</Text>
             <TextInput
               value={budgetName}
               onChangeText={setBudgetName}
@@ -388,17 +295,8 @@ export default function BudgetScreen() {
             />
           </View>
 
-          {/* Amount */}
           <View>
-            <Text
-              style={{
-                fontSize: 14,
-                color: colors.textMuted,
-                marginBottom: 8,
-              }}
-            >
-              Monthly Limit (ZAR)
-            </Text>
+            <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 8 }}>Monthly Limit (ZAR)</Text>
             <TextInput
               value={amount ? `R ${amount}` : ""}
               onChangeText={handleAmountChange}
@@ -420,17 +318,8 @@ export default function BudgetScreen() {
             />
           </View>
 
-          {/* Period Toggle */}
           <View>
-            <Text
-              style={{
-                fontSize: 14,
-                color: colors.textMuted,
-                marginBottom: 8,
-              }}
-            >
-              Budget Period
-            </Text>
+            <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 8 }}>Budget Period</Text>
             <View style={{ flexDirection: "row", gap: 8 }}>
               {(["monthly", "weekly"] as const).map((p) => (
                 <Pressable
@@ -447,14 +336,7 @@ export default function BudgetScreen() {
                     justifyContent: "center",
                   }}
                 >
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: period === p ? "600" : "400",
-                      color: period === p ? colors.secondary : colors.textSecondary,
-                      textTransform: "capitalize",
-                    }}
-                  >
+                  <Text style={{ fontSize: 14, fontWeight: period === p ? "600" : "400", color: period === p ? colors.secondary : colors.textSecondary, textTransform: "capitalize" }}>
                     {p}
                   </Text>
                 </Pressable>
@@ -462,7 +344,7 @@ export default function BudgetScreen() {
             </View>
           </View>
         </AnimatedView>
-      </ScrollView>
+      </View>
     </OnboardingScreenWrapper>
   );
 }

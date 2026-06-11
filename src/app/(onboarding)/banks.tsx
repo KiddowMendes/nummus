@@ -1,6 +1,5 @@
-// app/(onboarding)/banks.tsx
 import React, { useState, useEffect } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
 import Animated, {
   useSharedValue,
@@ -19,51 +18,41 @@ import { colors } from "@/constants/theme";
 const AnimatedView = Animated.createAnimatedComponent(View);
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-function BankCardItem({
+function BankGridItem({
   bank,
-  index,
   isSelected,
   onSelect,
-  totalCards,
+  index,
 }: {
   bank: Bank;
-  index: number;
   isSelected: boolean;
   onSelect: () => void;
-  totalCards: number;
+  index: number;
 }) {
   const scale = useSharedValue(1);
-  const entranceY = useSharedValue(40);
-  const entranceOpacity = useSharedValue(0);
+  const entrance = useSharedValue(0);
+  const translateY = useSharedValue(20);
 
   useEffect(() => {
-    // Staggered fan-out entrance
-    entranceY.value = withDelay(
-      index * 80,
-      withTiming(0, { duration: 500, easing: Easing.out(Easing.back(1.2)) })
-    );
-    entranceOpacity.value = withDelay(index * 80, withTiming(1, { duration: 400 }));
+    entrance.value = withDelay(index * 60, withTiming(1, { duration: 400 }));
+    translateY.value = withDelay(index * 60, withTiming(0, { duration: 300 }));
   }, []);
 
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: entrance.value,
+    transform: [
+      { scale: scale.value },
+      { translateY: translateY.value },
+    ],
+  }));
+
   const handlePressIn = () => {
-    scale.value = withSpring(0.97, { damping: 15, stiffness: 300 });
+    scale.value = withSpring(0.96, { damping: 15, stiffness: 300 });
   };
 
   const handlePressOut = () => {
     scale.value = withSpring(1, { damping: 15, stiffness: 300 });
   };
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: entranceY.value },
-      { scale: scale.value },
-    ],
-    opacity: entranceOpacity.value,
-  }));
-
-  // Calculate fan rotation: center card = 0°, outer cards tilt outward
-  const centerIndex = (totalCards - 1) / 2;
-  const rotation = (index - centerIndex) * 4; // ±12° max rotation
 
   return (
     <AnimatedPressable
@@ -72,15 +61,13 @@ function BankCardItem({
       onPressOut={handlePressOut}
       style={[
         {
-          width: 140,
-          height: 90,
+          flex: 1,
+          minWidth: "30%",
+          aspectRatio: 1.2,
           borderRadius: 16,
           overflow: "hidden",
-          marginHorizontal: -30, // Overlap cards
           borderWidth: 2,
-          borderColor: isSelected ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.08)",
-          transform: [{ rotateZ: `${rotation}deg` }],
-          zIndex: isSelected ? 10 : totalCards - Math.abs(index - centerIndex),
+          borderColor: isSelected ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.06)",
         },
         animatedStyle,
       ]}
@@ -89,65 +76,67 @@ function BankCardItem({
         colors={[bank.gradientFrom, bank.gradientTo]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={{ flex: 1, padding: 12, justifyContent: "space-between" }}
+        style={{
+          flex: 1,
+          padding: 14,
+          justifyContent: "space-between",
+        }}
       >
-        {/* Bank logo placeholder - circle with initial */}
+        {/* Top row: Initial + checkmark */}
         <View
           style={{
-            width: 28,
-            height: 28,
-            borderRadius: 14,
-            backgroundColor: "rgba(255,255,255,0.2)",
-            alignItems: "center",
-            justifyContent: "center",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
           }}
         >
-          <Text
+          <View
             style={{
-              fontSize: 12,
-              fontWeight: "700",
-              color: "white",
+              width: 28,
+              height: 28,
+              borderRadius: 14,
+              backgroundColor: "rgba(255,255,255,0.2)",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            {bank.shortName.charAt(0)}
-          </Text>
+            <Text style={{ fontSize: 12, fontWeight: "700", color: "white" }}>
+              {bank.shortName.charAt(0)}
+            </Text>
+          </View>
+
+          {isSelected && (
+            <View
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: 11,
+                backgroundColor: "white",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ fontSize: 12, color: bank.gradientFrom, fontWeight: "800" }}>
+                ✓
+              </Text>
+            </View>
+          )}
         </View>
 
-        {/* Bank name */}
+        {/* Bank name at bottom */}
         <Text
           style={{
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: "600",
             color: "white",
-            textShadowColor: "rgba(0,0,0,0.3)",
+            textShadowColor: "rgba(0,0,0,0.4)",
             textShadowOffset: { width: 0, height: 1 },
-            textShadowRadius: 3,
+            textShadowRadius: 2,
           }}
           numberOfLines={1}
         >
           {bank.shortName}
         </Text>
-
-        {/* Selection indicator */}
-        {isSelected && (
-          <View
-            style={{
-              position: "absolute",
-              top: 8,
-              right: 8,
-              width: 20,
-              height: 20,
-              borderRadius: 10,
-              backgroundColor: "white",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ fontSize: 12, color: bank.gradientFrom, fontWeight: "700" }}>
-              ✓
-            </Text>
-          </View>
-        )}
       </LinearGradient>
     </AnimatedPressable>
   );
@@ -156,20 +145,13 @@ function BankCardItem({
 export default function BanksScreen() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const fadeIn = useSharedValue(0);
-  const slideUp = useSharedValue(20);
 
   useEffect(() => {
     fadeIn.value = withDelay(200, withTiming(1, { duration: 500 }));
-    slideUp.value = withDelay(200, withTiming(0, { duration: 500, easing: Easing.out(Easing.cubic) }));
   }, []);
 
   const contentStyle = useAnimatedStyle(() => ({
     opacity: fadeIn.value,
-    transform: [{ translateY: slideUp.value }],
-  }));
-  const selectedListStyle = useAnimatedStyle(() => ({
-    opacity: withTiming(1, { duration: 300 }),
-    transform: [{ translateY: withTiming(0, { duration: 300 }) }],
   }));
 
   const toggleBank = (id: string) => {
@@ -192,7 +174,7 @@ export default function BanksScreen() {
             disabled={!hasSelection}
             onPress={() => router.push("/income")}
           >
-            {selectedIds.length > 0
+            {hasSelection
               ? `Continue (${selectedIds.length} bank${selectedIds.length > 1 ? "s" : ""})`
               : "Select at least one bank"}
           </NummusButton>
@@ -201,15 +183,15 @@ export default function BanksScreen() {
             style={{ alignItems: "center", paddingVertical: 12 }}
           >
             <Text style={{ fontSize: 14, color: colors.textMuted }}>
-              I\u2019ll do this later
+              I&apos;ll do this later
             </Text>
           </Pressable>
         </AnimatedView>
       }
     >
-      <View style={{ flex: 1 }}>
+      <View style={{ paddingTop: 8 }}>
         {/* Header */}
-        <AnimatedView style={[{ alignItems: "center", marginTop: 24, marginBottom: 32 }, contentStyle]}>
+        <AnimatedView style={[{ alignItems: "center", marginBottom: 24 }, contentStyle]}>
           <Text
             style={{
               fontSize: 28,
@@ -231,45 +213,41 @@ export default function BanksScreen() {
               maxWidth: 300,
             }}
           >
-            Connect up to 7 South African banks to track everything in one place.
+            Tap to select your South African banks
           </Text>
         </AnimatedView>
 
-        {/* Fanned Bank Cards */}
+        {/* Bank Grid — 2 columns, clean, tappable */}
         <View
           style={{
             flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            height: 140,
-            marginBottom: 32,
+            flexWrap: "wrap",
+            gap: 10,
+            marginBottom: 20,
           }}
         >
           {SEED_BANKS.map((bank, index) => (
-            <BankCardItem
+            <BankGridItem
               key={bank.id}
               bank={bank}
               index={index}
               isSelected={selectedIds.includes(bank.id)}
               onSelect={() => toggleBank(bank.id)}
-              totalCards={SEED_BANKS.length}
             />
           ))}
         </View>
 
-        {/* Selected banks list (appears when selected) */}
+        {/* Selected summary */}
         {selectedIds.length > 0 && (
           <AnimatedView
-            style={[
-              {
-                backgroundColor: colors.surface,
-                borderRadius: 16,
-                padding: 16,
-                borderWidth: 1,
-                borderColor: colors.hover,
-              },
-              selectedListStyle,
-            ]}
+            style={{
+              backgroundColor: colors.surface,
+              borderRadius: 16,
+              padding: 16,
+              borderWidth: 1,
+              borderColor: colors.hover,
+              marginBottom: 16,
+            }}
           >
             <Text
               style={{
@@ -281,7 +259,7 @@ export default function BanksScreen() {
                 marginBottom: 12,
               }}
             >
-              Selected Banks
+              Selected ({selectedIds.length})
             </Text>
             {selectedIds.map((id) => {
               const bank = SEED_BANKS.find((b) => b.id === id);
@@ -312,13 +290,6 @@ export default function BanksScreen() {
             })}
           </AnimatedView>
         )}
-
-        {/* Bank count indicator */}
-        <View style={{ alignItems: "center", marginTop: 16 }}>
-          <Text style={{ fontSize: 13, color: colors.textMuted }}>
-            {selectedIds.length} of {SEED_BANKS.length} selected
-          </Text>
-        </View>
       </View>
     </OnboardingScreenWrapper>
   );

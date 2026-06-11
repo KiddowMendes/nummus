@@ -15,6 +15,7 @@ import Animated, {
 import Svg, { Circle, Path, Defs, LinearGradient, Stop, Rect } from "react-native-svg";
 import { OnboardingScreenWrapper } from "@/components/onboardingScreenWrapper";
 import { NummusButton } from "@/components/ui/nummusButton";
+import { EntranceView } from "@/components/entrance-view";
 import { colors } from "@/constants/theme";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
@@ -225,7 +226,6 @@ export default function IncomeScreen() {
   const [incomeName, setIncomeName] = useState("");
   const [amount, setAmount] = useState("");
   const [frequency, setFrequency] = useState<"monthly" | "weekly" | "biweekly">("monthly");
-  const [showForm, setShowForm] = useState(false);
 
   const fadeIn = useSharedValue(0);
   const slideUp = useSharedValue(20);
@@ -283,17 +283,9 @@ export default function IncomeScreen() {
         contentContainerStyle={{ paddingBottom: 24 }}
       >
         {/* Illustration */}
-        <AnimatedView
-          style={[
-            { alignItems: "center", marginTop: 16, marginBottom: 32 },
-            useAnimatedStyle(() => ({
-              opacity: withDelay(100, withTiming(1, { duration: 600 })),
-              transform: [{ scale: withDelay(100, withTiming(1, { duration: 600, easing: Easing.out(Easing.back(1.5)) })) }],
-            })),
-          ]}
-        >
+        <EntranceView delay={100} style={{ alignItems: "center", marginTop: 16, marginBottom: 32 }}>
           <IncomeJar size={180} />
-        </AnimatedView>
+        </EntranceView>
 
         {/* Header */}
         <AnimatedView style={[{ alignItems: "center", marginBottom: 24 }, contentStyle]}>
