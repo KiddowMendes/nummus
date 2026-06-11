@@ -4,11 +4,20 @@ import Svg, { Path } from "react-native-svg";
 interface NummusLogoProps {
   width?: number;
   height?: number;
+  accessibilityLabel?: string;
 }
 
-export function NummusLogo({ width = 80, height = 80 }: NummusLogoProps) {
+export function NummusLogo({ width = 80, height = 80, accessibilityLabel = "Nummus logo" }: NummusLogoProps) {
   return (
-    <Svg width={width} height={height} viewBox="0 0 344.09 343.26" fill="none">
+    <Svg
+      width={width}
+      height={height}
+      viewBox="0 0 344.09 343.26"
+      fill="none"
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel={accessibilityLabel}
+    >
       <Path
         d="M.59,168.49l-.03-88.11C5.18,5.62,97.42-28,147.4,28.34c19.79,22.31,18.54,37.81,21.53,65.37,4.79,44.26,41.98,80.31,86.9,81.03v130.36s1.28,1.85,1.28,1.85l5.76.11v-132.31h80.64v89.63c-5.5,77.03-104.13,107.35-150.97,45.29-18.55-24.57-13.92-39.41-18.37-66.97-6.53-40.52-44.71-74.03-85.89-74.21V44.4l-1.14-.98-5.91.59v124.48H.59Z"
         fill="#1657e8"

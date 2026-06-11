@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text } from "@/tw";
 import { LinearGradient } from "expo-linear-gradient";
 import type { Bank } from "@/constants/banks";
 import type { AccountType } from "@/features/accounts/types";
 import { ACCOUNT_TYPE_LABELS } from "@/features/accounts/types";
+import { formatZAR } from "@/lib/format";
 
 interface BankCardProps {
   bank: Bank;
@@ -11,15 +12,6 @@ interface BankCardProps {
   accountType: AccountType;
   balanceCents: number;
   maskedNumber?: string;
-}
-
-function formatZAR(cents: number): string {
-  const rand = Math.abs(cents) / 100;
-  const formatted = rand.toLocaleString("en-ZA", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  return cents < 0 ? `-R${formatted}` : `R${formatted}`;
 }
 
 function generateMaskedNumber(): string {
@@ -39,7 +31,7 @@ export function BankCard({
   balanceCents,
   maskedNumber,
 }: BankCardProps) {
-  const displayNumber = maskedNumber ?? generateMaskedNumber();
+  const displayNumber = useMemo(() => maskedNumber ?? generateMaskedNumber(), [maskedNumber]);
   const textShadow = { textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 1 } as const, textShadowRadius: 3 };
 
   return (

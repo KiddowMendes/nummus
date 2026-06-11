@@ -3,10 +3,42 @@ import { View, Text, Pressable } from "@/tw";
 import { router } from "expo-router";
 import { FormInput } from "@/components/form-input";
 
+function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 export default function SignUpScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const handleSignUp = () => {
+    let valid = true;
+    if (!name.trim()) {
+      setNameError("Please enter your full name");
+      valid = false;
+    } else {
+      setNameError("");
+    }
+    if (!email || !validateEmail(email)) {
+      setEmailError("Please enter a valid email address");
+      valid = false;
+    } else {
+      setEmailError("");
+    }
+    if (!password || password.length < 8) {
+      setPasswordError("Password must be at least 8 characters");
+      valid = false;
+    } else {
+      setPasswordError("");
+    }
+    if (valid) {
+      // TODO: implement authentication
+    }
+  };
 
   return (
     <View className="flex-1 bg-background px-6">
@@ -31,24 +63,27 @@ export default function SignUpScreen() {
           <FormInput
             label="Full Name"
             value={name}
-            onChangeText={setName}
+            onChangeText={(t) => { setName(t); setNameError(""); }}
             placeholder="John Doe"
             autoCapitalize="words"
+            error={nameError}
           />
           <FormInput
             label="Email"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(t) => { setEmail(t); setEmailError(""); }}
             placeholder="you@email.com"
             keyboardType="email-address"
             autoCapitalize="none"
+            error={emailError}
           />
           <FormInput
             label="Password"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(t) => { setPassword(t); setPasswordError(""); }}
             placeholder="Create a strong password"
             secureTextEntry
+            error={passwordError}
           />
         </View>
       </View>
@@ -56,6 +91,7 @@ export default function SignUpScreen() {
         <Pressable
           className="bg-primary rounded-xl items-center active:opacity-80"
           style={{ height: 48 }}
+          onPress={handleSignUp}
         >
           <Text className="text-white text-lg font-semibold">Sign Up</Text>
         </Pressable>

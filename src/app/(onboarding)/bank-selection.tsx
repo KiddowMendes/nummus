@@ -99,12 +99,13 @@ export default function BankSelectionScreen() {
           }`}
           style={{ height: 48, opacity: selectedBank ? 1 : 0.38 }}
           disabled={!selectedBank}
-          onPress={() =>
+          onPress={() => {
+            if (!selectedId) return;
             router.push({
               pathname: "/create-account",
               params: { bankId: selectedId },
-            })
-          }
+            });
+          }}
         >
           <Text
             className={`text-lg font-semibold ${
