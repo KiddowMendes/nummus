@@ -1,74 +1,106 @@
-# Nummus 🪙
+# Nummus
 
-**Financial management, elevated.**
+Financial management, mobile first.
 
-Nummus is a high-performance, visually stunning personal finance application built for the South African market. Originally conceived as a web-based dashboard, this Expo-powered evolution brings "financial dashboard excellence" directly to mobile, combining robust tracking with native-level polish, gamification, and AI-powered insights.
+Nummus is a premium Expo personal finance app for the South African market. The restart is focused on a local-first mobile MVP before desktop, cloud sync, bank sync, or advanced reporting.
 
----
-
-## 🚀 The Vision
-To transform financial management from a chore into a delightful, rewarding experience. Nummus isn't just an expense tracker; it’s a financial coach that helps South Africans master their net worth, crush their debts, and achieve their goals through a modern, bento-inspired interface.
-
-## ✨ Core Pillars
-
-### 1. The Financial Hub (Accounts & Transactions)
-- **SA Bank Presets:** Deep integration with South African banking aesthetics (FNB, Standard Bank, Capitec, etc.).
-- **Multi-Currency:** Native ZAR support with real-time conversion for international assets.
-- **Smart Categorization:** AI-assisted transaction tagging and merchant recognition.
-- **Receipt Management:** Seamless attachment of invoices and receipts using native camera capabilities.
-
-### 2. Strategic Planning (Budgets & Goals)
-- **Interactive Budgets:** Category-specific limits with smart rollovers and real-time alerts.
-- **Goal Milestones:** Visual progress rings and celebrations for savings milestones.
-- **Debt Snowball/Avalanche:** Dedicated debt tracking for loans, credit cards, and mortgages with payment projection.
-
-### 3. Gamification & Growth
-- **Financial RPG:** Earn points, maintain daily streaks, and unlock achievements for healthy financial habits.
-- **Community Challenges:** Opt-in challenges to stay motivated alongside other users.
-- **AI Insights:** Personalized tips and anomaly detection to optimize spending patterns.
-
-### 4. Native-First UI/UX
-- **Bento Dashboard:** A customizable, widget-based home screen.
-- **Fluid Motion:** Powered by React Native Reanimated for 60fps micro-interactions and transitions.
-- **Dark/Light Mode:** Seamless theme switching with system-level integration.
-- **Offline Reliability:** Full support for tracking transactions while on the move, even without a connection.
+The active product blueprint is [docs/nummus-mobile-blueprint-v2.md](docs/nummus-mobile-blueprint-v2.md). The agent playbook is [AGENTS.md](AGENTS.md).
 
 ---
 
-## 🛠 Tech Stack (The Reconstruction)
+## Current Direction
 
-- **Framework:** [Expo](https://expo.dev/) (SDK 56+) with [Expo Router](https://docs.expo.dev/router/introduction/)
-- **UI/Styling:** Native primitives + [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/) + [FlashList](https://shopify.github.io/flash-list/)
-- **Backend:** Hono API (Edge Runtime)
-- **Database:** PostgreSQL (Neon.tech) with Drizzle ORM
-- **State Management:** TanStack Query (Server State) & Zustand (Client State)
-- **Language:** TypeScript (Strict Mode)
+Nummus v1 is built around one excellent first loop:
+
+- Pick a South African bank.
+- Create a first local account.
+- See a polished dark BankCard with matching bank colors.
+- Store money safely as integer cents.
+- Format all MVP currency as South African Rand.
+
+The old full-platform vision still matters, but it is no longer the first implementation target.
 
 ---
 
-## 📁 Project Structure (Target)
+## V1 Principles
 
-```text
+- Expo mobile app first; desktop comes later.
+- Local-first data using client state and device persistence.
+- Premium dark fintech interface.
+- ZAR-only MVP.
+- Manual tracking before automation.
+- One feature per prompt, one verification pass, one commit.
+
+Deferred until later phases:
+
+- Clerk authentication
+- Hono API routes
+- Neon/PostgreSQL
+- Drizzle ORM
+- TanStack Query
+- Bank sync
+- SARS/PDF exports
+- Advanced AI insights
+
+---
+
+## Tech Stack
+
+Use the installed versions in `package.json`.
+
+- Expo
+- Expo Router
+- React Native
+- TypeScript strict mode
+- NativeWind v5 preview with Tailwind CSS v4
+- React Native Reanimated
+- expo-image
+
+Planned additions for the first account loop, with approval before install:
+
+- Zustand
+- `@react-native-async-storage/async-storage`
+
+---
+
+## Project Structure
+
+Target structure:
+
+```txt
 src/
-├── app/                # Expo Router file-based navigation
-├── components/         # Atomic UI components (Buttons, Cards, Modals)
-├── features/           # Domain-driven modules (accounts, goals, etc.)
-│   ├── api/            # TanStack Query hooks
-│   ├── components/     # Feature-specific UI
-│   └── store/          # Feature-specific Zustand stores
-├── hooks/              # Shared custom hooks (useTheme, useAuth)
-├── lib/                # Shared utilities (currency, date formatting)
-├── providers/          # Context providers (Theme, QueryClient)
-└── assets/             # Branding, icons, and fonts
+  app/                # Expo Router routes/screens only
+  components/         # Shared reusable UI
+  constants/          # Colors, images, banks, categories
+  features/           # Domain modules
+  hooks/              # Shared hooks
+  lib/                # Formatting, dates, ids, validation helpers
+  providers/          # App-level providers
+  tw/                 # NativeWind wrapper components
 ```
 
----
-
-## 🇿🇦 Tailored for South Africa
-- **ZAR First:** Primary currency formatting and local bank branding.
-- **Low-Data Friendly:** Optimized API payloads and offline-first capabilities.
-- **SARS Ready:** Future-planned export features for tax-compliant expense reporting.
+Root `assets/` remains the current asset home unless an asset migration is requested.
 
 ---
 
-*Nummus is currently in active reconstruction. This README serves as the architectural blueprint for the mobile evolution.*
+## Development Commands
+
+```bash
+npm run start
+npm run lint
+npm run typecheck
+```
+
+Use Expo Go first for development verification. Native builds are only needed when a dependency or platform feature requires them.
+
+---
+
+## Documentation Order
+
+When instructions conflict, use this order:
+
+1. `AGENTS.md`
+2. `docs/nummus-mobile-blueprint-v2.md`
+3. Current repo code and installed package versions
+4. Historical external documentation
+

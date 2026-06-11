@@ -1,71 +1,126 @@
-# Nummus Roadmap: Atlas Plan
+# Nummus Roadmap
 
-This roadmap outlines the phased development of the Nummus mobile application, following MENDOR Corp’s standards for high-performance financial software.
+This roadmap follows the mobile-first restart described in [docs/nummus-mobile-blueprint-v2.md](docs/nummus-mobile-blueprint-v2.md).
 
-All development follows a **trunk-based development** workflow:
-- Development branch: `dev`
-- All features are developed in short-lived feature branches and merged into `dev` via Pull Requests.
-- CI/CD pipeline runs linting, type-checking, and unit tests on every push.
+Development uses the Practical Vibe Coding loop: one feature, one prompt, one verification, one commit.
 
 ---
 
-## Phase 1: Foundation (The Shell)
-**Objective:** Establish the robust architectural skeleton and design system.
+## Phase 0: Documentation And Foundation
 
-- **Key Components:**
-    - Expo Router setup with protected routes.
-    - Atomic Design system (components/ui/): Buttons, Inputs, Cards, Typography (consistent with Bento UI).
-    - Navigation scaffold (Bottom Tabs, Stack).
-    - Theme Provider (Dark/Light mode support).
-- **Success Criteria:**
-    - Clean app startup under 1s.
-    - Navigation transitions feel native (Reanimated).
-    - Component library documentation (Storybook/Visual verification).
+Objective: remove conflicting instructions and make the repo ready for focused mobile feature work.
 
-## Phase 2: Core Financial Data (The Hub)
-**Objective:** Implement secure user authentication and essential financial data handling.
+Deliverables:
 
-- **Key Components:**
-    - Clerk Auth integration (Auth flows).
-    - Accounts CRUD (ZAR focus).
-    - Transaction feed (FlashList).
-    - Smart categorization logic.
-- **Success Criteria:**
-    - Auth latency < 500ms.
-    - Transaction list scroll performance at steady 60fps.
-    - Secure data handling (encryption-at-rest basics).
+- Rewrite `AGENTS.md` as the strict agent constitution.
+- Add the mobile-first v2 blueprint.
+- Align README and roadmap with local-first v1.
+- Add a `typecheck` script.
+- Confirm lint and typecheck pass.
 
-## Phase 3: Financial Planning (Strategic Growth)
-**Objective:** Empower users with budgeting and debt-tracking capabilities.
+Success criteria:
 
-- **Key Components:**
-    - Budget Management module.
-    - Debt Tracking (Snowball/Avalanche UI).
-    - Goal Milestones & Progress UI.
-- **Success Criteria:**
-    - Real-time budget alerts triggered within 2s of transaction.
-    - Debt projection calculations are accurate to the cent.
-    - Goal progress visualization is fluid and responsive.
+- Future agents are not instructed to build Next.js, Vercel, shadcn/ui, or database-first flows for v1.
+- The first implementation slice is clearly onboarding plus first account.
 
-## Phase 4: Gamification & AI (The "Coach")
-**Objective:** Drive retention and engagement through behavioral insights and rewards.
+---
 
-- **Key Components:**
-    - Streak tracking system.
-    - Achievement system (Badges, leveling).
-    - AI Insight Engine (Backend integration).
-- **Success Criteria:**
-    - Gamification feedback loops are instantaneous.
-    - AI insights are delivered contextually and accurately.
-    - High user engagement metrics (daily active use).
+## Phase 1: First Account Loop
 
-## Phase 5: Polish & Performance (The Final Mile)
-**Objective:** Optimize for maximum performance, accessibility, and trust.
+Objective: prove the core mobile value in the smallest useful flow.
 
-- **Key Components:**
-    - Offline-first optimization (Persistent storage).
-- **Success Criteria:**
-    - 60fps across all main screens.
-    - 99.9% uptime and crash-free sessions.
-    - Accessibility (A11y) compliance (WCAG 2.1).
-    - Trust indicators (Security badges, transparency screens).
+Deliverables:
+
+- Welcome screen.
+- Bank selection using South African bank seed data.
+- First account creation form.
+- Live premium dark BankCard preview.
+- Account state and local persistence after approved dependency install.
+- First dashboard shell showing the created account.
+
+Success criteria:
+
+- A user can create one ZAR account locally.
+- Money is entered as rand and stored as cents.
+- Bank colors match the selected bank.
+- No auth, API, database, or bank sync is introduced.
+
+---
+
+## Phase 2: Manual Tracking
+
+Objective: make Nummus useful as a daily local tracker.
+
+Deliverables:
+
+- Transaction categories.
+- Manual transaction creation.
+- Transaction list grouped by date.
+- Recent transactions on home.
+- Account balance behavior defined and implemented.
+- Empty states for no transactions.
+
+Success criteria:
+
+- Users can add and review transactions without cloud services.
+- Lists remain smooth on realistic mobile data sizes.
+- ZAR formatting is consistent everywhere.
+
+---
+
+## Phase 3: Planning Tools
+
+Objective: add the planning features that make Nummus more than an account list.
+
+Deliverables:
+
+- Budgets.
+- Goals.
+- Debt tracker.
+- Progress visuals.
+- Gentle milestone celebrations.
+
+Success criteria:
+
+- Budget, goal, and debt calculations are cents-safe.
+- Progress UI is responsive and readable on mobile.
+- Reanimated is used for meaningful transitions.
+
+---
+
+## Phase 4: Engagement And Local Insights
+
+Objective: add motivation without overbuilding.
+
+Deliverables:
+
+- Lightweight XP.
+- Streaks based on meaningful finance actions.
+- Small achievement set.
+- Rule-based local insights.
+
+Success criteria:
+
+- Engagement features support financial behavior rather than distracting from it.
+- No external AI service or secret-bearing integration is required.
+
+---
+
+## Phase 5: Cloud Readiness
+
+Objective: add cloud capabilities only after local flows prove useful.
+
+Possible deliverables:
+
+- Clerk auth.
+- API routes.
+- Neon/Postgres persistence.
+- TanStack Query for server state.
+- Read-only bank sync proof of concept.
+- Exports and compliance workflows.
+
+Success criteria:
+
+- Cloud work has a dedicated security review.
+- No bank credentials are stored by Nummus.
+- Server state is added only where it creates real user value.
