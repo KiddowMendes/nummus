@@ -4,6 +4,32 @@ import { StyleSheet } from "react-native";
 import { View, Text, Pressable } from "@/tw";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, { Path, Circle } from "react-native-svg";
+
+function VaultIcon({ color }: { color: string }) {
+  return (
+    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="10" stroke={color} strokeWidth="1.5" />
+      <Path d="M12 6v6l4 2" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+function HistoryIcon({ color }: { color: string }) {
+  return (
+    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+      <Path d="M4 6h16M4 12h16M4 18h12" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function InsightsIcon({ color }: { color: string }) {
+  return (
+    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+      <Path d="M4 20h16M6 16V8m4 8v-4m4 4v-6m4 6v-2" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
 
 export default function DemoTabsLayout() {
   const insets = useSafeAreaInsets();
@@ -15,14 +41,14 @@ export default function DemoTabsLayout() {
           headerShown: false,
           tabBarStyle: {
             backgroundColor: "#0A0A0F",
-            borderTopColor: "rgba(212, 175, 55, 0.08)",
+            borderTopColor: "rgba(22, 87, 232, 0.1)",
             borderTopWidth: 1,
             height: 64 + insets.bottom,
             paddingBottom: insets.bottom + 8,
             paddingTop: 8,
           },
-          tabBarActiveTintColor: "#D4AF37",
-          tabBarInactiveTintColor: "rgba(255, 255, 255, 0.35)",
+          tabBarActiveTintColor: "#1657E8",
+          tabBarInactiveTintColor: "rgba(255, 255, 255, 0.3)",
           tabBarLabelStyle: {
             fontSize: 11,
             fontWeight: "600",
@@ -34,32 +60,26 @@ export default function DemoTabsLayout() {
           name="index"
           options={{
             title: "Vault",
-            tabBarIcon: ({ color }) => (
-              <Text style={{ fontSize: 20, color }}>🏛️</Text>
-            ),
+            tabBarIcon: ({ color }) => <VaultIcon color={color} />,
           }}
         />
         <Tabs.Screen
           name="transactions"
           options={{
             title: "History",
-            tabBarIcon: ({ color }) => (
-              <Text style={{ fontSize: 20, color }}>📜</Text>
-            ),
+            tabBarIcon: ({ color }) => <HistoryIcon color={color} />,
           }}
         />
         <Tabs.Screen
           name="insights"
           options={{
             title: "Insights",
-            tabBarIcon: ({ color }) => (
-              <Text style={{ fontSize: 20, color }}>📊</Text>
-            ),
+            tabBarIcon: ({ color }) => <InsightsIcon color={color} />,
           }}
         />
       </Tabs>
 
-      {/* Floating "Start My Vault" pill */}
+      {/* Floating CTA pill */}
       <View
         style={[
           styles.floatingPill,
@@ -76,7 +96,7 @@ export default function DemoTabsLayout() {
 
       {/* Demo badge */}
       <View style={styles.demoBadge}>
-        <Text style={styles.demoBadgeText}>DEMO MODE</Text>
+        <Text style={styles.demoBadgeText}>DEMO</Text>
       </View>
     </View>
   );
@@ -91,18 +111,18 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   pillButton: {
-    backgroundColor: "#D4AF37",
+    backgroundColor: "#1657E8",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 999,
-    shadowColor: "#D4AF37",
+    shadowColor: "#1657E8",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 8,
   },
   pillText: {
-    color: "#0A0A0F",
+    color: "#FFFFFF",
     fontWeight: "800",
     fontSize: 14,
     letterSpacing: 0.5,
@@ -111,15 +131,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 52,
     right: 16,
-    backgroundColor: "rgba(212, 175, 55, 0.15)",
-    borderColor: "rgba(212, 175, 55, 0.3)",
+    backgroundColor: "rgba(22, 87, 232, 0.15)",
+    borderColor: "rgba(22, 87, 232, 0.3)",
     borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
   },
   demoBadgeText: {
-    color: "#D4AF37",
+    color: "#1657E8",
     fontSize: 9,
     fontWeight: "800",
     letterSpacing: 1.5,
