@@ -1,4 +1,3 @@
-// app/_layout.tsx
 import "../global.css";
 import React from "react";
 import { Stack } from "expo-router";
@@ -21,6 +20,7 @@ export default function RootLayout() {
         >
           <Stack.Screen name="index" />
           <Stack.Screen name="(onboarding)" />
+          <Stack.Screen name="onboarding-new" />
           <Stack.Screen name="(auth)" />
         </Stack>
       </View>

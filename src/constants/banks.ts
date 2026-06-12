@@ -52,12 +52,20 @@ export const SEED_BANKS: Bank[] = [
     sortOrder: 5,
   },
   {
+    id: 'tymebank',
+    name: 'TymeBank',
+    shortName: 'TymeBank',
+    gradientFrom: '#00A651',
+    gradientTo: '#00D66B',
+    sortOrder: 6,
+  },
+  {
     id: 'discovery',
     name: 'Discovery Bank',
     shortName: 'Discovery',
     gradientFrom: '#8B5CF6',
     gradientTo: '#6D28D9',
-    sortOrder: 6,
+    sortOrder: 7,
   },
   {
     id: 'other',
@@ -65,7 +73,7 @@ export const SEED_BANKS: Bank[] = [
     shortName: 'Other',
     gradientFrom: '#4B5563',
     gradientTo: '#9CA3AF',
-    sortOrder: 7,
+    sortOrder: 8,
   },
 ] as const;
 

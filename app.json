@@ -10,9 +10,7 @@
       "package": "com.nummus.app",
       "predictiveBackGestureEnabled": false
     },
-    "web": {
-      "output": "static"
-    },
+    "web": {},
     "plugins": [
       "expo-router",
       [
@@ -24,8 +22,7 @@
       "expo-web-browser"
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     }
   }
 }

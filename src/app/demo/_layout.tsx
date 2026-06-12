@@ -3,7 +3,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { View } from "@/tw";
 
-export default function OnboardingLayout() {
+export default function DemoLayout() {
   return (
     <View className="flex-1 bg-background">
       <StatusBar style="light" />
@@ -11,7 +11,7 @@ export default function OnboardingLayout() {
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: "transparent" },
-          animation: "fade",
+          animation: "slide_from_right",
         }}
       />
     </View>

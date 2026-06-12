@@ -1,4 +1,3 @@
-// components/ui/NummusButton.tsx
 import React from "react";
 import { Pressable, Text, type PressableProps } from "react-native";
 import Animated, {
@@ -8,7 +7,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { colors } from "@/constants/theme";
 
-interface NummusButtonProps extends PressableProps {
+interface ButtonProps extends PressableProps {
   variant?: "primary" | "secondary" | "ghost";
   size?: "default" | "lg";
   children: string;
@@ -16,13 +15,13 @@ interface NummusButtonProps extends PressableProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function NummusButton({
+export function Button({
   variant = "primary",
   size = "lg",
   children,
   disabled,
   ...props
-}: NummusButtonProps) {
+}: ButtonProps) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -40,10 +39,10 @@ export function NummusButton({
   const bgStyles = {
     primary: {
       backgroundColor: disabled ? colors.surfaceRaised : colors.primary,
-      opacity: disabled ? 0.38 : 1,
+      opacity: disabled ? 0.5 : 1,
     },
     secondary: {
-      backgroundColor: colors.surfaceRaised,
+      backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.hover,
     },

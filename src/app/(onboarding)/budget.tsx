@@ -1,350 +1,261 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, TextInput, Pressable } from "react-native";
+import React, { useState, useRef, useEffect } from "react";
+import { View, Text, Pressable } from "@/tw";
+import { Animated, TextInput, StyleSheet } from "react-native";
+import Svg, { Circle, Line, Defs, LinearGradient as SvgGradient, Stop } from "react-native-svg";
 import { router } from "expo-router";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withDelay,
-  withSpring,
-  withRepeat,
-  withSequence,
-  Easing,
-  interpolate,
-} from "react-native-reanimated";
-import Svg, { Circle, Line, Defs, LinearGradient, Stop } from "react-native-svg";
-import { OnboardingScreenWrapper } from "@/components/onboardingScreenWrapper";
-import { NummusButton } from "@/components/ui/nummusButton";
-import { colors } from "@/constants/theme";
+import { SafeAreaView } from "@/components/ui/SafeAreaView";
+import { ProgressDots } from "@/components/ui/progress-dots";
+import { Button } from "@/components/ui/button";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
-// ─── Budget Ring — FIXED: No useAnimatedProps on Circle ─────────────
-
-function BudgetRing({ size = 160 }: { size?: number }) {
-  const progress = useSharedValue(0);
-  const glowPulse = useSharedValue(0);
-  const centerScale = useSharedValue(0);
-
-  const strokeWidth = 12;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-
-  useEffect(() => {
-    progress.value = withDelay(400, withTiming(0.7, { duration: 1500, easing: Easing.out(Easing.cubic) }));
-    centerScale.value = withDelay(800, withSpring(1, { damping: 12, stiffness: 200 }));
-    glowPulse.value = withDelay(
-      1200,
-      withRepeat(
-        withSequence(
-          withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.sin) }),
-          withTiming(0.3, { duration: 2000, easing: Easing.inOut(Easing.sin) })
-        ),
-        -1,
-        true
-      )
-    );
-  }, []);
-
-  // Animate the strokeDashoffset via a wrapper View's width/opacity instead
-  const ringContainerStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0, 0.1], [0, 1]),
-  }));
-
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(glowPulse.value, [0.3, 1], [0.06, 0.15]),
-    transform: [{ scale: interpolate(glowPulse.value, [0.3, 1], [0.9, 1.1]) }],
-  }));
-
-  const centerStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: centerScale.value }],
-    opacity: centerScale.value,
-  }));
-
-  // Calculate current dashoffset based on progress
-  const currentOffset = circumference * (1 - 0.7); // 70% filled
-
-  return (
-    <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
-      <Animated.View
-        style={[
-          {
-            position: "absolute",
-            width: size * 1.3,
-            height: size * 1.3,
-            borderRadius: (size * 1.3) / 2,
-            backgroundColor: colors.primary,
-          },
-          glowStyle,
-        ]}
-      />
-
-      <Animated.View style={ringContainerStyle}>
-        <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          <Defs>
-            <LinearGradient id="ringGradient" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0%" stopColor="#4F46E5" />
-              <Stop offset="50%" stopColor="#7C3AED" />
-              <Stop offset="100%" stopColor="#A855F7" />
-            </LinearGradient>
-            <LinearGradient id="trackGradient" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0%" stopColor="rgba(79,70,229,0.1)" />
-              <Stop offset="100%" stopColor="rgba(124,58,237,0.05)" />
-            </LinearGradient>
-          </Defs>
-
-          {/* Background track */}
-          <Circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke="url(#trackGradient)"
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-          />
-
-          {/* Progress ring — static offset, animated via parent opacity */}
-          <Circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke="url(#ringGradient)"
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={currentOffset}
-            transform={`rotate(-90, ${size / 2}, ${size / 2})`}
-          />
-
-          {/* Ticks */}
-          {Array.from({ length: 12 }, (_, i) => {
-            const angle = (i * 30 * Math.PI) / 180;
-            const cx = size / 2;
-            const cy = size / 2;
-            const x1 = cx + (radius - 18) * Math.cos(angle);
-            const y1 = cy + (radius - 18) * Math.sin(angle);
-            const x2 = cx + (radius - 10) * Math.cos(angle);
-            const y2 = cy + (radius - 10) * Math.sin(angle);
-            return (
-              <Line
-                key={i}
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
-                stroke="rgba(255,255,255,0.1)"
-                strokeWidth={2}
-                strokeLinecap="round"
-              />
-            );
-          })}
-        </Svg>
-      </Animated.View>
-
-      {/* Center badge */}
-      <AnimatedView
-        style={[
-          {
-            position: "absolute",
-            width: 72,
-            height: 72,
-            borderRadius: 36,
-            backgroundColor: colors.surface,
-            borderWidth: 1,
-            borderColor: "rgba(124,58,237,0.3)",
-            alignItems: "center",
-            justifyContent: "center",
-          },
-          centerStyle,
-        ]}
-      >
-        <Text style={{ fontSize: 22 }}>🎯</Text>
-        <Text style={{ fontSize: 10, fontWeight: "600", color: colors.secondary, marginTop: 2 }}>
-          BUDGET
-        </Text>
-      </AnimatedView>
-    </View>
-  );
-}
-
-// ─── Category Chips (unchanged) ──────────────────────────────────────
-
-const CATEGORIES = [
-  { id: "food", label: "🍔 Food", color: "#F59E0B" },
-  { id: "transport", label: "🚗 Transport", color: "#3B82F6" },
-  { id: "data", label: "📱 Data", color: "#8B5CF6" },
-  { id: "entertainment", label: "🎬 Fun", color: "#EC4899" },
-  { id: "shopping", label: "👕 Shopping", color: "#F97316" },
-  { id: "health", label: "💊 Health", color: "#EF4444" },
-  { id: "education", label: "📚 Education", color: "#10B981" },
-  { id: "other", label: "✏️ Other", color: "#6B7280" },
-];
-
-function CategoryChip({ label, color, isSelected, onPress }: any) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        paddingHorizontal: 14,
-        paddingVertical: 10,
-        borderRadius: 12,
-        backgroundColor: isSelected ? color + "20" : colors.surfaceRaised,
-        borderWidth: 1,
-        borderColor: isSelected ? color : colors.hover,
-      }}
-    >
-      <Text style={{ fontSize: 13, fontWeight: isSelected ? "600" : "400", color: isSelected ? color : colors.textSecondary }}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-// ─── Main Screen ───────────────────────────────────────────────────
+const CATEGORIES = ["Food", "Transport", "Data & Airtime", "Entertainment", "Shopping", "Health", "Education", "Other"];
+const PERIODS = ["Monthly", "Weekly"];
 
 export default function BudgetScreen() {
-  const [category, setCategory] = useState("");
+  const [selectedCat, setSelectedCat] = useState("");
   const [budgetName, setBudgetName] = useState("");
   const [amount, setAmount] = useState("");
-  const [period, setPeriod] = useState<"monthly" | "weekly">("monthly");
-
-  const fadeIn = useSharedValue(0);
-  const slideUp = useSharedValue(20);
+  const [period, setPeriod] = useState("Monthly");
+  const ringFade = useRef(new Animated.Value(0)).current;
+  const textFade = useRef(new Animated.Value(0)).current;
+  const textSlide = useRef(new Animated.Value(24)).current;
+  const buttonsFade = useRef(new Animated.Value(0)).current;
+  const buttonsSlide = useRef(new Animated.Value(20)).current;
 
   useEffect(() => {
-    fadeIn.value = withDelay(200, withTiming(1, { duration: 500 }));
-    slideUp.value = withDelay(200, withTiming(0, { duration: 500, easing: Easing.out(Easing.cubic) }));
+    Animated.stagger(120, [
+      Animated.timing(ringFade, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.parallel([
+        Animated.timing(textFade, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(textSlide, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(buttonsFade, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(buttonsSlide, {
+          toValue: 0,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
   }, []);
 
-  const contentStyle = useAnimatedStyle(() => ({
-    opacity: fadeIn.value,
-    transform: [{ translateY: slideUp.value }],
+  const handleContinue = () => {
+    router.push("/(onboarding)/savings-goal");
+  };
+
+  const handleSkip = () => {
+    router.push("/(onboarding)/savings-goal");
+  };
+
+  const circumference = 2 * Math.PI * 40;
+  const offset = circumference * 0.3;
+
+  const tickMarks = Array.from({ length: 12 }, (_, i) => ({
+    angle: i * 30,
+    x1: 50 + 43 * Math.cos(((i * 30 - 90) * Math.PI) / 180),
+    y1: 50 + 43 * Math.sin(((i * 30 - 90) * Math.PI) / 180),
+    x2: 50 + 38 * Math.cos(((i * 30 - 90) * Math.PI) / 180),
+    y2: 50 + 38 * Math.sin(((i * 30 - 90) * Math.PI) / 180),
   }));
 
-  const handleAmountChange = useCallback((text: string) => {
-    const cleaned = text.replace(/[^0-9]/g, "");
-    const num = parseInt(cleaned) || 0;
-    setAmount(num > 0 ? num.toLocaleString("en-ZA") : "");
-  }, []);
-
-  const isValid = category.length > 0 && budgetName.trim().length >= 2 && amount.length > 0;
-  const selectedCategory = CATEGORIES.find((c) => c.id === category);
-
   return (
-    <OnboardingScreenWrapper
-      step={5}
-      glowColor={colors.secondary}
-      bottomContent={
-        <AnimatedView style={contentStyle}>
-          <NummusButton variant="primary" size="lg" disabled={!isValid} onPress={() => router.push("/goals")}>
-            Continue
-          </NummusButton>
-          <Pressable onPress={() => router.push("/goals")} style={{ alignItems: "center", paddingVertical: 12 }}>
-            <Text style={{ fontSize: 14, color: colors.textMuted }}>Skip for now</Text>
-          </Pressable>
-        </AnimatedView>
-      }
-    >
-      <View style={{ paddingTop: 8 }}>
-        {/* Illustration */}
-        <View style={{ alignItems: "center", marginBottom: 24 }}>
-          <BudgetRing size={160} />
-        </View>
-
-        {/* Header */}
-        <AnimatedView style={[{ alignItems: "center", marginBottom: 24 }, contentStyle]}>
-          <Text style={{ fontSize: 28, fontWeight: "700", color: colors.textPrimary, textAlign: "center", marginBottom: 8, letterSpacing: -0.5 }}>
-            Set a Budget
-          </Text>
-          <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: "center", lineHeight: 24, maxWidth: 300 }}>
-            Pick a category and set a monthly limit. We&apos;ll warn you before you overspend.
-          </Text>
-        </AnimatedView>
-
-        {/* Form */}
-        <AnimatedView style={[{ gap: 20 }, contentStyle]}>
-          <View>
-            <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 10 }}>Pick a Category</Text>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-              {CATEGORIES.map((cat) => (
-                <CategoryChip key={cat.id} label={cat.label} color={cat.color} isSelected={category === cat.id} onPress={() => setCategory(cat.id)} />
-              ))}
-            </View>
-          </View>
-
-          <View>
-            <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 8 }}>Budget Name</Text>
-            <TextInput
-              value={budgetName}
-              onChangeText={setBudgetName}
-              placeholder="e.g. Groceries"
-              placeholderTextColor={colors.textDisabled}
-              autoCapitalize="words"
-              style={{
-                height: 56,
-                backgroundColor: colors.surfaceRaised,
-                borderRadius: 16,
-                paddingHorizontal: 20,
-                fontSize: 16,
-                color: colors.textPrimary,
-                borderWidth: 1,
-                borderColor: budgetName.length > 0 ? (selectedCategory?.color || colors.secondary) : colors.hover,
-              }}
-            />
-          </View>
-
-          <View>
-            <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 8 }}>Monthly Limit (ZAR)</Text>
-            <TextInput
-              value={amount ? `R ${amount}` : ""}
-              onChangeText={handleAmountChange}
-              placeholder="R 0.00"
-              placeholderTextColor={colors.textDisabled}
-              keyboardType="numeric"
-              style={{
-                height: 56,
-                backgroundColor: colors.surfaceRaised,
-                borderRadius: 16,
-                paddingHorizontal: 20,
-                fontSize: 18,
-                fontWeight: "600",
-                color: colors.textPrimary,
-                borderWidth: 1,
-                borderColor: amount.length > 0 ? (selectedCategory?.color || colors.secondary) : colors.hover,
-                fontVariant: ["tabular-nums"],
-              }}
-            />
-          </View>
-
-          <View>
-            <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 8 }}>Budget Period</Text>
-            <View style={{ flexDirection: "row", gap: 8 }}>
-              {(["monthly", "weekly"] as const).map((p) => (
-                <Pressable
-                  key={p}
-                  onPress={() => setPeriod(p)}
-                  style={{
-                    flex: 1,
-                    height: 48,
-                    borderRadius: 12,
-                    backgroundColor: period === p ? colors.secondary + "20" : colors.surfaceRaised,
-                    borderWidth: 1,
-                    borderColor: period === p ? colors.secondary : colors.hover,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Text style={{ fontSize: 14, fontWeight: period === p ? "600" : "400", color: period === p ? colors.secondary : colors.textSecondary, textTransform: "capitalize" }}>
-                    {p}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-        </AnimatedView>
+    <SafeAreaView scrollable scrollableContentClassName="flex-grow px-6 pt-6 pb-8">
+      <View className="mb-6">
+        <ProgressDots total={10} current={8} />
       </View>
-    </OnboardingScreenWrapper>
+
+      {/* Budget ring */}
+      <AnimatedView
+        className="items-center pt-4"
+        style={{ opacity: ringFade }}
+      >
+        <View className="w-[140px] h-[140px] items-center justify-center mb-8">
+          <Svg width={140} height={140} viewBox="0 0 100 100" style={{ position: "absolute" }}>
+            <Defs>
+              <SvgGradient id="budgetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <Stop offset="0%" stopColor="#1657E8" />
+                <Stop offset="100%" stopColor="#7C3AED" />
+              </SvgGradient>
+            </Defs>
+            {/* Background ring */}
+            <Circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="7" />
+            {/* Progress ring */}
+            <Circle
+              cx="50"
+              cy="50"
+              r="40"
+              fill="none"
+              stroke="url(#budgetGrad)"
+              strokeWidth="7"
+              strokeDasharray={`${circumference}`}
+              strokeDashoffset={offset}
+              strokeLinecap="round"
+              transform="rotate(-90 50 50)"
+            />
+            {/* Tick marks */}
+            {tickMarks.map((t, i) => (
+              <Line
+                key={i}
+                x1={t.x1}
+                y1={t.y1}
+                x2={t.x2}
+                y2={t.y2}
+                stroke="rgba(255,255,255,0.15)"
+                strokeWidth="0.8"
+              />
+            ))}
+          </Svg>
+          <View className="items-center">
+            <Text className="text-text-primary text-2xl font-bold">70%</Text>
+            <Text className="text-text-muted text-[10px] uppercase tracking-wider">Used</Text>
+          </View>
+        </View>
+      </AnimatedView>
+
+      {/* Title & subtitle */}
+      <AnimatedView
+        className="items-center"
+        style={{
+          opacity: textFade,
+          transform: [{ translateY: textSlide }],
+        }}
+      >
+        <Text className="text-text-primary text-[28px] font-bold leading-tight text-center mb-2">
+          Create your first budget
+        </Text>
+        <Text className="text-text-secondary text-base leading-5 text-center mb-6">
+          Pick a category and set a monthly limit
+        </Text>
+      </AnimatedView>
+
+      {/* Category chips */}
+      <View className="flex-row flex-wrap gap-2 mb-5">
+        {CATEGORIES.map((cat) => (
+          <Pressable
+            key={cat}
+            onPress={() => {
+              setSelectedCat(cat);
+              if (!budgetName) setBudgetName(cat);
+            }}
+            style={[
+              styles.chip,
+              selectedCat === cat && styles.chipSelected,
+            ]}
+          >
+            <Text
+              className={`text-sm font-medium ${
+                selectedCat === cat ? "text-primary" : "text-text-secondary"
+              }`}
+            >
+              {cat}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {/* Budget name input */}
+      <TextInput
+        value={budgetName}
+        onChangeText={setBudgetName}
+        placeholder="Budget name (e.g. Groceries)"
+        placeholderTextColor="rgba(148,163,184,0.4)"
+        className="w-full h-14 bg-surface rounded-xl px-4 text-base text-text-primary mb-4"
+      />
+
+      {/* Amount + period */}
+      <View className="flex-row gap-3 mb-6">
+        <View className="relative flex-1">
+          <View className="absolute left-4 top-0 bottom-0 justify-center z-10">
+            <Text className="text-text-primary text-lg font-semibold">R</Text>
+          </View>
+          <TextInput
+            value={amount}
+            onChangeText={setAmount}
+            placeholder="0.00"
+            keyboardType="decimal-pad"
+            placeholderTextColor="rgba(148,163,184,0.4)"
+            className="w-full h-14 bg-surface rounded-xl pl-10 pr-4 text-base text-text-primary font-bold tabular-nums"
+          />
+        </View>
+        <View className="bg-surface rounded-xl p-1 flex-row">
+          {PERIODS.map((p) => (
+            <Pressable
+              key={p}
+              onPress={() => setPeriod(p)}
+              style={[
+                styles.periodBtn,
+                period === p && styles.periodBtnActive,
+              ]}
+            >
+              <Text
+                className={`text-sm font-medium ${
+                  period === p ? "text-text-primary" : "text-text-muted"
+                }`}
+              >
+                {p}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      {/* Bottom buttons */}
+      <AnimatedView
+        className="pt-4 gap-4"
+        style={{
+          opacity: buttonsFade,
+          transform: [{ translateY: buttonsSlide }],
+        }}
+      >
+        <Button variant="primary" size="lg" onPress={handleContinue}>
+          Continue
+        </Button>
+
+        <Pressable onPress={handleSkip} className="items-center py-2">
+          <Text className="text-text-muted text-sm">Skip</Text>
+        </Pressable>
+      </AnimatedView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: "#12121A",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  chipSelected: {
+    borderColor: "rgba(22,87,232,0.4)",
+    backgroundColor: "rgba(22,87,232,0.06)",
+  },
+  periodBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  periodBtnActive: {
+    backgroundColor: "#0D0D14",
+  },
+});

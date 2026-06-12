@@ -12,6 +12,9 @@
       ]
     }
   },
+  "exclude": [
+    "../Design Document"
+  ],
   "include": [
     "**/*.ts",
     "**/*.tsx",

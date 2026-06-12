@@ -68,15 +68,36 @@ Planned additions for the first account loop, with approval before install:
 Target structure:
 
 ```txt
-src/
-  app/                # Expo Router routes/screens only
-  components/         # Shared reusable UI
-  constants/          # Colors, images, banks, categories
-  features/           # Domain modules
-  hooks/              # Shared hooks
-  lib/                # Formatting, dates, ids, validation helpers
-  providers/          # App-level providers
-  tw/                 # NativeWind wrapper components
+app/
+├── index.tsx                    # Gate: routes to breath or unlock
+├── (auth)/
+│   ├── _layout.tsx              # Auth stack (no header)
+│   └── unlock.tsx               # PIN unlock for returning users
+├── onboarding/
+│   ├── _layout.tsx              # Onboarding stack
+│   ├── breath.tsx               # The Breath (animated coin)
+│   ├── demo-gate.tsx            # Choose demo or real onboarding
+│   ├── name.tsx                 # Your name
+│   ├── pin-setup.tsx            # 4-digit PIN
+│   ├── pin-confirm.tsx          # PIN confirmation
+│   ├── add-account.tsx          # Link first SA bank
+│   ├── goal.tsx                 # Pick financial goal
+│   └── all-set.tsx              # Celebration + enter app
+└── demo/
+    ├── _layout.tsx              # Demo stack
+    └── (tabs)/
+        ├── _layout.tsx          # Demo tabs + floating "Start My Vault"
+        ├── index.tsx            # Demo dashboard
+        ├── transactions.tsx     # Demo transaction history
+        └── insights.tsx         # Demo insights + goals
+
+components/
+├── coin-breath.tsx              # Reusable animated coin
+├── onboarding-progress.tsx      # Gold fuse progress bar
+└── demo-data.ts                 # Realistic SA student data
+
+stores/
+└── onboarding-store.ts          # Zustand persistence
 ```
 
 Root `assets/` remains the current asset home unless an asset migration is requested.
